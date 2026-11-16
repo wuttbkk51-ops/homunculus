@@ -1,163 +1,254 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดการ - Homunculus</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; }
-        header { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
-        .logo { font-size: 1.25rem; font-weight: 700; color: #2563eb; }
-        .user-nav { display: flex; align-items: center; gap: 1rem; }
-        .active-branch-pill { background: #eff6ff; color: #1d4ed8; font-size: 0.8125rem; font-weight: 600; padding: 0.35rem 0.75rem; border-radius: 9999px; border: 1px solid #bfdbfe; }
-        .container { max-width: 64rem; margin: 2rem auto; padding: 0 1rem; }
-        .card { background: #ffffff; border-radius: 0.5rem; border: 1px solid #e2e8f0; padding: 1.5rem; margin-bottom: 1.5rem; }
-        h2 { font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; color: #0f172a; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; }
-        th { font-weight: 600; color: #64748b; background-color: #f8fafc; }
-        .badge-allowed { background: #dcfce7; color: #15803d; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 0.25rem; display: inline-block; }
-        .badge-denied { background: #fee2e2; color: #b91c1c; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 0.25rem; display: inline-block; }
-        .btn-link { color: #2563eb; text-decoration: none; font-size: 0.875rem; font-weight: 500; }
-        .btn-link:hover { text-decoration: underline; }
-        .branch-select { font-size: 0.8125rem; font-weight: 600; padding: 0.35rem 0.75rem; border-radius: 0.375rem; border: 1px solid #cbd5e1; background-color: #ffffff; color: #1e293b; cursor: pointer; outline: none; transition: border-color 0.2s; }
-        .branch-select:hover, .branch-select:focus { border-color: #2563eb; }
-        .btn-logout { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 0.875rem; font-weight: 600; }
-        .btn-logout:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="logo">Homunculus Admin</div>
-        <div class="user-nav">
-            <?php $myBranches = user_branches(); ?>
-            <?php if (! empty($myBranches)): ?>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <label for="branchSwitcher" style="font-size: 0.8125rem; color: #64748b; font-weight: 500;">สาขา:</label>
-                    <select id="branchSwitcher" class="branch-select" onchange="location.href='<?= site_url('switch-branch') ?>/' + this.value">
-                        <?php foreach ($myBranches as $b): ?>
-                            <option value="<?= esc($b['branch_id']) ?>" <?= (int) $b['branch_id'] === (int) active_branch_id() ? 'selected' : '' ?>>
-                                <?= esc($b['branch_name']) ?> (<?= esc($b['branch_role']) ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+<?= $this->extend('layouts/admin') ?>
+
+<?= $this->section('title') ?>แดชบอร์ด - Homunculus Admin<?= $this->endSection() ?>
+
+<?= $this->section('pageHeader') ?>
+<div class="d-flex align-items-center gap-2">
+    <i class="bi bi-speedometer2 text-primary fs-3"></i>
+    <div>
+        <h3 class="mb-0 fw-bold fs-4">แดชบอร์ดผู้ดูแลระบบ</h3>
+        <p class="text-secondary small mb-0">ระบบบริหารจัดการและภาพรวมสิทธิ์การเข้าถึงข้อมูล</p>
+    </div>
+</div>
+<?= $this->endSection() ?>
+
+<?= $this->section('breadcrumb') ?>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="<?= site_url('dashboard') ?>" class="text-decoration-none">หน้าหลัก</a></li>
+        <li class="breadcrumb-item active" aria-current="page">แดชบอร์ด</li>
+    </ol>
+</nav>
+<?= $this->endSection() ?>
+
+<?= $this->section('content') ?>
+<!-- Minimal Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-secondary small fw-medium">สาขาปัจจุบัน</span>
+                        <h5 class="fw-bold text-dark mb-0 mt-1">
+                            <?= esc($activeBranch['name'] ?? 'ทุกสาขา (SuperAdmin)') ?>
+                        </h5>
+                    </div>
+                    <div class="bg-primary-subtle text-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-building fs-5"></i>
+                    </div>
                 </div>
-            <?php elseif (is_superadmin()): ?>
-                <span class="active-branch-pill" style="background:#fef3c7; color:#92400e; border-color:#fde68a;">
-                    SuperAdmin (ทุกสาขา)
-                </span>
-            <?php endif; ?>
-
-            <span style="font-size: 0.875rem; color: #475569;">ผู้ใช้: <strong><?= esc($user->username ?? '') ?></strong></span>
-
-            <form action="<?= site_url('logout') ?>" method="get" style="display:inline;">
-                <button type="submit" class="btn-logout">ออกจากระบบ</button>
-            </form>
+            </div>
         </div>
-    </header>
+    </div>
 
-    <main class="container">
-        <div class="card">
-            <h2>บริบทผู้ใช้งาน (Contextual State)</h2>
-            <table>
-                <tr>
-                    <th style="width: 30%;">User ID / Username</th>
-                    <td>#<?= esc($user->id ?? '-') ?> (<?= esc($user->username ?? '-') ?>)</td>
-                </tr>
-                <tr>
-                    <th>Tenant ID</th>
-                    <td><?= esc(current_tenant_id() ?? 'NULL (SuperAdmin)') ?></td>
-                </tr>
-                <tr>
-                    <th>Active Branch</th>
-                    <td>
-                        <?php if ($activeBranch): ?>
-                            <?= esc($activeBranch['name']) ?> (Code: <?= esc($activeBranch['code']) ?>)
-                        <?php else: ?>
-                            <em>ไม่ได้ระบุ (SuperAdmin Mode)</em>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Contextual Role ในสาขานี้</th>
-                    <td><strong><?= esc($activeBranch['branch_role'] ?? ($user->isSuperAdmin() ? 'superadmin' : '-')) ?></strong></td>
-                </tr>
-            </table>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-secondary small fw-medium">บทบาทในสาขานี้</span>
+                        <h5 class="fw-bold text-dark mb-0 mt-1">
+                            <?= esc($activeBranch['branch_role'] ?? ($user->isSuperAdmin() ? 'superadmin' : '-')) ?>
+                        </h5>
+                    </div>
+                    <div class="bg-success-subtle text-success rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-person-badge fs-5"></i>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="card">
-            <h2>ผลการตรวจสอบสิทธิ์แบบบริบท (Contextual RBAC: auth_can)</h2>
-            <p style="font-size: 0.8125rem; color: #64748b; margin-bottom: 1rem;">
-                สิทธิ์จะถูกประเมินแบบ Permission-First ตาม Role ของสาขาที่กำลังทำงานอยู่
-            </p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Permission Key</th>
-                        <th>คำอธิบาย</th>
-                        <th>สถานะการอนุญาต</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><code>sale.view.own</code></td>
-                        <td>ดูยอดขายเฉพาะของตนเอง (.own)</td>
-                        <td>
-                            <?php if (auth_can('sale.view.own')): ?>
-                                <span class="badge-allowed">ผ่านการอนุญาต (Allowed)</span>
-                            <?php else: ?>
-                                <span class="badge-denied">ปฏิเสธ (Denied)</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><code>sale.create.branch</code></td>
-                        <td>เปิดบิลขายภายในสาขา (.branch)</td>
-                        <td>
-                            <?php if (auth_can('sale.create.branch')): ?>
-                                <span class="badge-allowed">ผ่านการอนุญาต (Allowed)</span>
-                            <?php else: ?>
-                                <span class="badge-denied">ปฏิเสธ (Denied)</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><code>sale.delete.branch</code></td>
-                        <td>ยกเลิกบิลขายภายในสาขา (.branch)</td>
-                        <td>
-                            <?php if (auth_can('sale.delete.branch')): ?>
-                                <span class="badge-allowed">ผ่านการอนุญาต (Allowed)</span>
-                            <?php else: ?>
-                                <span class="badge-denied">ปฏิเสธ (Denied)</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><code>sale.view.all</code></td>
-                        <td>ดูยอดขายรวมทุกสาขาใน Tenant (.all)</td>
-                        <td>
-                            <?php if (auth_can('sale.view.all')): ?>
-                                <span class="badge-allowed">ผ่านการอนุญาต (Allowed)</span>
-                            <?php else: ?>
-                                <span class="badge-denied">ปฏิเสธ (Denied)</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><code>user.manage.all</code></td>
-                        <td>จัดการผู้ใช้ทั้งหมดใน Tenant (.all)</td>
-                        <td>
-                            <?php if (auth_can('user.manage.all')): ?>
-                                <span class="badge-allowed">ผ่านการอนุญาต (Allowed)</span>
-                            <?php else: ?>
-                                <span class="badge-denied">ปฏิเสธ (Denied)</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-secondary small fw-medium">Tenant ID</span>
+                        <h5 class="fw-bold text-dark mb-0 mt-1">
+                            <?= esc(current_tenant_id() ?? 'NULL (SuperAdmin)') ?>
+                        </h5>
+                    </div>
+                    <div class="bg-info-subtle text-info rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-shield-check fs-5"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-    </main>
-</body>
-</html>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-secondary small fw-medium">ผู้ใช้งาน</span>
+                        <h5 class="fw-bold text-dark mb-0 mt-1">
+                            <?= esc($user->username ?? '-') ?>
+                        </h5>
+                    </div>
+                    <div class="bg-warning-subtle text-warning-emphasis rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="bi bi-person fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Cards -->
+<div class="row g-4">
+    <!-- บริบทผู้ใช้งาน (Contextual State) -->
+    <div class="col-lg-5">
+        <div class="card card-outline card-primary shadow-sm border-0 h-100">
+            <div class="card-header bg-transparent py-3">
+                <h5 class="card-title fw-bold text-dark mb-0">
+                    <i class="bi bi-info-circle me-1 text-primary"></i>บริบทผู้ใช้งาน (Contextual State)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0 align-middle">
+                        <tbody>
+                            <tr>
+                                <th class="text-secondary small ps-3" style="width: 40%;">User ID / Username</th>
+                                <td class="pe-3 fw-medium">#<?= esc($user->id ?? '-') ?> (<?= esc($user->username ?? '-') ?>)</td>
+                            </tr>
+                            <tr>
+                                <th class="text-secondary small ps-3">Tenant ID</th>
+                                <td class="pe-3">
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis">
+                                        <?= esc(current_tenant_id() ?? 'SuperAdmin (ไม่มี Tenant)') ?>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-secondary small ps-3">Active Branch</th>
+                                <td class="pe-3">
+                                    <?php if ($activeBranch): ?>
+                                        <strong><?= esc($activeBranch['name']) ?></strong>
+                                        <span class="text-secondary small">(Code: <?= esc($activeBranch['code']) ?>)</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-warning-subtle text-warning-emphasis">SuperAdmin Mode</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-secondary small ps-3">Contextual Role</th>
+                                <td class="pe-3">
+                                    <span class="badge bg-primary">
+                                        <?= esc($activeBranch['branch_role'] ?? ($user->isSuperAdmin() ? 'superadmin' : '-')) ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ผลการตรวจสอบสิทธิ์แบบบริบท (Contextual RBAC: auth_can) -->
+    <div class="col-lg-7">
+        <div class="card card-outline card-success shadow-sm border-0 h-100">
+            <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+                <h5 class="card-title fw-bold text-dark mb-0">
+                    <i class="bi bi-shield-check me-1 text-success"></i>ผลการตรวจสอบสิทธิ์แบบบริบท
+                </h5>
+                <span class="badge bg-secondary-subtle text-secondary small">Permission-First</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Permission Key</th>
+                                <th>คำอธิบาย</th>
+                                <th class="text-end pe-3">สถานะสิทธิ์</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-3"><code class="text-primary">sale.view.own</code></td>
+                                <td class="small text-secondary">ดูยอดขายเฉพาะของตนเอง (.own)</td>
+                                <td class="text-end pe-3">
+                                    <?php if (auth_can('sale.view.own')): ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="bi bi-check-circle me-1"></i>อนุญาต (Allowed)
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                            <i class="bi bi-x-circle me-1"></i>ปฏิเสธ (Denied)
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3"><code class="text-primary">sale.create.branch</code></td>
+                                <td class="small text-secondary">เปิดบิลขายภายในสาขา (.branch)</td>
+                                <td class="text-end pe-3">
+                                    <?php if (auth_can('sale.create.branch')): ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="bi bi-check-circle me-1"></i>อนุญาต (Allowed)
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                            <i class="bi bi-x-circle me-1"></i>ปฏิเสธ (Denied)
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3"><code class="text-primary">sale.delete.branch</code></td>
+                                <td class="small text-secondary">ยกเลิกบิลขายภายในสาขา (.branch)</td>
+                                <td class="text-end pe-3">
+                                    <?php if (auth_can('sale.delete.branch')): ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="bi bi-check-circle me-1"></i>อนุญาต (Allowed)
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                            <i class="bi bi-x-circle me-1"></i>ปฏิเสธ (Denied)
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3"><code class="text-primary">sale.view.all</code></td>
+                                <td class="small text-secondary">ดูยอดขายรวมทุกสาขาใน Tenant (.all)</td>
+                                <td class="text-end pe-3">
+                                    <?php if (auth_can('sale.view.all')): ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="bi bi-check-circle me-1"></i>อนุญาต (Allowed)
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                            <i class="bi bi-x-circle me-1"></i>ปฏิเสธ (Denied)
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3"><code class="text-primary">user.manage.all</code></td>
+                                <td class="small text-secondary">จัดการผู้ใช้ทั้งหมดใน Tenant (.all)</td>
+                                <td class="text-end pe-3">
+                                    <?php if (auth_can('user.manage.all')): ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="bi bi-check-circle me-1"></i>อนุญาต (Allowed)
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                            <i class="bi bi-x-circle me-1"></i>ปฏิเสธ (Denied)
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?= $this->endSection() ?>
