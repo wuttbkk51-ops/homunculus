@@ -21,7 +21,7 @@ $breadcrumbsList = $breadcrumbs ?? null;
                 <?php if ($customHeader): ?>
                     <?= $customHeader ?>
                 <?php elseif ($title): ?>
-                    <?= page_header_title($title, $subtitle ?? '', $icon ?? '') ?>
+                    <?= pageTitle($title, $subtitle ?? '', $icon ?? '') ?>
                 <?php else: ?>
                     <h3 class="mb-0 fw-bold fs-4">ระบบจัดการ</h3>
                 <?php endif; ?>
@@ -32,7 +32,7 @@ $breadcrumbsList = $breadcrumbs ?? null;
                 <?php if ($customBreadcrumb): ?>
                     <?= $customBreadcrumb ?>
                 <?php elseif (! empty($breadcrumbsList) && is_array($breadcrumbsList)): ?>
-                    <?= render_breadcrumbs($breadcrumbsList) ?>
+                    <?= breadcrumb($breadcrumbsList) ?>
                 <?php endif; ?>
 
                 <?php if ($customActions): ?>

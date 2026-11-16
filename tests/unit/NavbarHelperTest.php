@@ -190,4 +190,67 @@ final class NavbarHelperTest extends CIUnitTestCase
         $this->assertStringContainsString('จัดการสินค้า', $fullHeaderHtml);
         $this->assertStringContainsString('เพิ่มสินค้า', $fullHeaderHtml);
     }
+
+    /**
+     * ทดสอบ Helper Functions ที่ตั้งชื่อตาม AdminLTE 4 Native Classes:
+     * navItem(), navLink(), dropdownItem(), navButton(), breadcrumb(), pageTitle(), pageHeader()
+     */
+    public function testAdminLteNativeHelpers(): void
+    {
+        // ล็อกอิน SuperAdmin
+        $userModel = model(UserModel::class);
+        $superAdminId = (int) $userModel->insert([
+            'username'  => 'superadmin_native',
+            'tenant_id' => null,
+            'active'    => 1,
+        ]);
+
+        /** @var User $savedUser */
+        $savedUser = $userModel->findById($superAdminId);
+        $savedUser->addGroup('admin');
+        auth()->login($savedUser);
+
+        service('language')->setLocale('th');
+
+        // 1. navItem() -> ต้องได้ <li class="nav-item"><a class="nav-link" ...
+        $itemHtml = navItem('sales', 'admin/sales');
+        $this->assertStringStartsWith('<li class="nav-item">', $itemHtml);
+        $this->assertStringContainsString('class="nav-link"', $itemHtml);
+        $this->assertStringContainsString('admin/sales', $itemHtml);
+        $this->assertStringContainsString('การขาย', $itemHtml);
+        $this->assertStringEndsWith('</li>', $itemHtml);
+
+        // 2. navLink() -> ต้องได้ <a class="nav-link" ... โดยไม่มี <li>
+        $linkHtml = navLink('sales', 'admin/sales');
+        $this->assertStringStartsWith('<a href="', $linkHtml);
+        $this->assertStringContainsString('class="nav-link"', $linkHtml);
+        $this->assertStringNotContainsString('<li', $linkHtml);
+
+        // 3. dropdownItem() -> ต้องได้ <a class="dropdown-item" ...
+        $dropHtml = dropdownItem('users', 'admin/users');
+        $this->assertStringStartsWith('<a href="', $dropHtml);
+        $this->assertStringContainsString('class="dropdown-item"', $dropHtml);
+        $this->assertStringContainsString('ผู้ใช้งาน', $dropHtml);
+
+        // 4. navButton() -> ต้องได้ <a class="btn ...
+        $btnHtml = navButton('pos', 'admin/pos');
+        $this->assertStringStartsWith('<a href="', $btnHtml);
+        $this->assertStringContainsString('class="btn btn-primary btn-sm"', $btnHtml);
+        $this->assertStringContainsString('จุดขายหน้าร้าน', $btnHtml);
+
+        // 5. pageTitle() & breadcrumb()
+        $pTitle = pageTitle('สินค้า', 'คำอธิบาย', 'bi bi-box');
+        $this->assertStringContainsString('สินค้า', $pTitle);
+        $this->assertStringContainsString('bi bi-box', $pTitle);
+
+        $bcHtml = breadcrumb(['หน้าหลัก' => 'dashboard', 'สินค้า' => null]);
+        $this->assertStringContainsString('breadcrumb', $bcHtml);
+        $this->assertStringContainsString('active', $bcHtml);
+
+        // 6. pageHeader()
+        $headerHtml = pageHeader('หัวข้อ', 'คำอธิบาย', 'bi bi-star', ['หน้าหลัก' => null], $btnHtml);
+        $this->assertStringContainsString('app-content-header', $headerHtml);
+        $this->assertStringContainsString('หัวข้อ', $headerHtml);
+        $this->assertStringContainsString($btnHtml, $headerHtml);
+    }
 }
