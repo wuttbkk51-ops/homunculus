@@ -1,5 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * Auth Helper สำหรับระบบยืนยันตัวตนและการตรวจสอบสิทธิ์แบบ Contextual RBAC (Permission-First)
+ */
+
 use App\Entities\User;
 use App\Services\AuthService;
 use App\Services\BranchService;
@@ -7,6 +13,10 @@ use App\Services\BranchService;
 if (! function_exists('auth_can')) {
     /**
      * ตรวจสอบสิทธิ์แบบ Contextual RBAC (Permission-First)
+     *
+     * @param string    $permission รหัสสิทธิ์ เช่น sale.view.branch, sale.*
+     * @param User|null $user       Entity ผู้ใช้ (หากไม่ระบุจะใช้ผู้ใช้ปัจจุบัน)
+     * @param int|null  $branchId   รหัสสาขา (หากไม่ระบุจะใช้ Active Branch ปัจจุบัน)
      */
     function auth_can(string $permission, ?User $user = null, ?int $branchId = null): bool
     {
@@ -19,14 +29,11 @@ if (! function_exists('auth_can')) {
 
 if (! function_exists('active_branch_id')) {
     /**
-     * ดึง ID ของสาขาที่ Active อยู่ในปัจจุบัน
+     * ดึง ID ของสาขาที่ Active อยู่ในปัจจุบัน (Alias ของ branch_id())
      */
     function active_branch_id(): ?int
     {
-        /** @var BranchService $branchService */
-        $branchService = service('branch_service');
-
-        return $branchService->getActiveBranchId();
+        return branch_id();
     }
 }
 
@@ -38,10 +45,7 @@ if (! function_exists('active_branch')) {
      */
     function active_branch(): ?array
     {
-        /** @var BranchService $branchService */
-        $branchService = service('branch_service');
-
-        return $branchService->getActiveBranch();
+        return session()->get('active_branch');
     }
 }
 
@@ -54,7 +58,7 @@ if (! function_exists('user_branches')) {
     function user_branches(): array
     {
         $user = auth()->user();
-        if (! $user) {
+        if ($user === null) {
             return [];
         }
 
@@ -67,13 +71,11 @@ if (! function_exists('user_branches')) {
 
 if (! function_exists('current_tenant_id')) {
     /**
-     * ดึง ID ของ Tenant ประจำตัวผู้ใช้ที่ล็อกอินอยู่
+     * ดึง ID ของ Tenant ประจำตัวผู้ใช้ที่ล็อกอินอยู่ (Alias ของ tenant_id())
      */
     function current_tenant_id(): ?int
     {
-        $user = auth()->user();
-
-        return $user ? $user->getTenantId() : null;
+        return tenant_id();
     }
 }
 
@@ -84,7 +86,17 @@ if (! function_exists('is_superadmin')) {
     function is_superadmin(): bool
     {
         $user = auth()->user();
+        if ($user === null) {
+            return false;
+        }
 
-        return $user ? $user->isSuperAdmin() : false;
+        if (method_exists($user, 'isSuperAdmin')) {
+            return $user->isSuperAdmin();
+        }
+
+        $tenantId = $user->tenant_id ?? null;
+
+        return (int) $user->id === 1
+            || ($tenantId === null && method_exists($user, 'inGroup') && $user->inGroup('admin'));
     }
 }
