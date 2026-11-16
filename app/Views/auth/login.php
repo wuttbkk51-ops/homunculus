@@ -3,6 +3,11 @@
 <?= $this->section('title') ?>เข้าสู่ระบบ - Homunculus<?= $this->endSection() ?>
 
 <?= $this->section('main') ?>
+<?php
+$isDev           = ENVIRONMENT === 'development';
+$defaultEmail    = $isDev ? 'superadmin@homunculus.test' : '';
+$defaultPassword = $isDev ? 'Password123!' : '';
+?>
 <div class="login-box">
     <!-- Login Logo -->
     <div class="login-logo mb-4 text-center">
@@ -15,7 +20,17 @@
     <!-- Login Card -->
     <div class="card card-outline card-primary shadow-sm border-0">
         <div class="card-body login-card-body p-4">
-            <p class="login-box-msg text-center text-secondary mb-4">เข้าสู่ระบบเพื่อเริ่มใช้งาน</p>
+            <p class="login-box-msg text-center text-secondary mb-3">เข้าสู่ระบบเพื่อเริ่มใช้งาน</p>
+
+            <!-- Dev Mode Helper Alert -->
+            <?php if ($isDev): ?>
+                <div class="alert alert-info py-2 px-3 small mb-3 border-info-subtle bg-info-subtle text-info-emphasis">
+                    <div class="d-flex align-items-center mb-1 fw-bold">
+                        <i class="bi bi-code-slash me-1"></i> Dev Mode Pre-filled
+                    </div>
+                    <div>SuperAdmin: <code>superadmin@homunculus.test</code></div>
+                </div>
+            <?php endif; ?>
 
             <!-- Alerts -->
             <?php if (session('error') !== null): ?>
@@ -49,7 +64,7 @@
 
                 <!-- Email หรือ Username -->
                 <div class="input-group mb-3">
-                    <input type="email" class="form-control" name="email" inputmode="email" autocomplete="email" placeholder="<?= lang('Auth.email') ?>" value="<?= old('email') ?>" required autofocus>
+                    <input type="email" class="form-control" name="email" inputmode="email" autocomplete="email" placeholder="<?= lang('Auth.email') ?>" value="<?= old('email', $defaultEmail) ?>" required autofocus>
                     <div class="input-group-text bg-body-tertiary">
                         <span class="bi bi-envelope text-secondary"></span>
                     </div>
@@ -57,7 +72,7 @@
 
                 <!-- Password -->
                 <div class="input-group mb-3">
-                    <input type="password" class="form-control" name="password" inputmode="text" autocomplete="current-password" placeholder="<?= lang('Auth.password') ?>" required>
+                    <input type="password" class="form-control" name="password" inputmode="text" autocomplete="current-password" placeholder="<?= lang('Auth.password') ?>" value="<?= $defaultPassword ?>" required>
                     <div class="input-group-text bg-body-tertiary">
                         <span class="bi bi-lock text-secondary"></span>
                     </div>
