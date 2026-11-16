@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 /**
  * Navbar & Header Helper สำหรับ AdminLTE 4 และ Bootstrap 5
- * ฟังก์ชันได้รับการตั้งชื่อให้สอดคล้องกับ Native Class ของ AdminLTE 4 เช่น navItem(), navLink(), dropdownItem(), breadcrumb(), pageHeader()
- * รองรับการตรวจสอบสิทธิ์แบบ Contextual RBAC (Permission-First), Auto-Language (i18n),
- * Module Aliases, Default Icons และการสร้าง Page Header / Breadcrumb อัตโนมัติ
+ * ฟังก์ชันสอดคล้องกับ Native Class เช่น navItem(), navLink(), dropdownItem(), navButton(), breadcrumb(), pageHeader()
+ * รองรับการตรวจสอบสิทธิ์ Contextual RBAC (Permission-First), Modular i18n, Default Icons
  */
 
 if (! function_exists('navbar_resolve_module')) {
@@ -17,16 +16,15 @@ if (! function_exists('navbar_resolve_module')) {
      */
     function navbar_resolve_module(string $permission): string
     {
-        $permission = trim($permission);
-
-        // หากมีจุดอยู่แล้ว แสดงว่าเป็น full permission key (เช่น sale.create.branch หรือ sale.*)
-        if (str_contains($permission, '.')) {
-            return $permission;
+        $clean = trim($permission);
+        if (str_contains($clean, '.')) {
+            return $clean;
         }
 
         $moduleMap = [
             'sales'      => 'sale.*',
             'sale'       => 'sale.*',
+            'pos'        => 'sale.create.branch',
             'items'      => 'product.*',
             'item'       => 'product.*',
             'products'   => 'product.*',
@@ -46,11 +44,10 @@ if (! function_exists('navbar_resolve_module')) {
             'setting'    => 'admin.settings',
             'tenants'    => 'tenant.*',
             'tenant'     => 'tenant.*',
-            'pos'        => 'sale.create.branch',
             'dashboard'  => 'admin.access',
         ];
 
-        return $moduleMap[strtolower($permission)] ?? (strtolower($permission) . '.*');
+        return $moduleMap[strtolower($clean)] ?? (strtolower($clean) . '.*');
     }
 }
 
@@ -65,6 +62,7 @@ if (! function_exists('navbar_default_icon')) {
         $icons = [
             'sales'      => 'bi bi-cart3',
             'sale'       => 'bi bi-cart3',
+            'pos'        => 'bi bi-shop',
             'items'      => 'bi bi-box-seam',
             'item'       => 'bi bi-box-seam',
             'products'   => 'bi bi-box-seam',
@@ -84,19 +82,15 @@ if (! function_exists('navbar_default_icon')) {
             'setting'    => 'bi bi-gear',
             'tenants'    => 'bi bi-buildings',
             'tenant'     => 'bi bi-buildings',
-            'pos'        => 'bi bi-shop',
             'dashboard'  => 'bi bi-speedometer2',
         ];
 
         $lowerKey = strtolower(trim($permission));
-
         if (isset($icons[$lowerKey])) {
             return $icons[$lowerKey];
         }
 
-        // หากเป็น permission ย่อย เช่น sale.create.branch ให้ตัดคำหน้าโมดูลมาหาไอคอน
-        $parts = explode('.', $lowerKey);
-        $module = $parts[0] ?? '';
+        $module = explode('.', $lowerKey)[0] ?? '';
 
         return $icons[$module] ?? 'bi bi-circle';
     }
@@ -143,8 +137,8 @@ if (! function_exists('navbar_resolve_module_file')) {
 
 if (! function_exists('navbar_resolve_label')) {
     /**
-     * ดึงข้อความ Label อัตโนมัติจากไฟล์ระบบภาษาแยกตามโมดูล (Dashboard, Users, Items, Sales, Reports, Settings)
-     * กติกา: ดึงตรงตามชื่อ key ของ permission หรือ module slug (เช่น navItem('dashboard') ดึง lang('Dashboard.dashboard'))
+     * ดึงข้อความ Label อัตโนมัติจากไฟล์ระบบภาษาแยกตามโมดูล
+     * กติกา: ดึงตรงตามชื่อ key เช่น navItem('dashboard') -> lang('Dashboard.dashboard')
      *
      * @internal
      */
@@ -157,17 +151,11 @@ if (! function_exists('navbar_resolve_label')) {
         $key  = trim($permission);
         $file = navbar_resolve_module_file($key);
 
-        // รายการคีย์ค้นหา: ดึงตามชื่อ key ที่ส่งมาโดยตรง (ไม่มี 'module_name')
-        $candidateKeys = [
-            $key,
-            strtolower($key),
-        ];
+        $candidateKeys = [$key, strtolower($key)];
 
-        // กรณีเป็นคำเดี่ยว เช่น sale ลองหา sales หรือกลับกัน
         if (! str_contains($key, '.')) {
             $candidateKeys[] = str_ends_with($key, 's') ? rtrim($key, 's') : ($key . 's');
         } else {
-            // ถ้าเป็น granular key เช่น sale.create.branch ให้ลองตัดคำ action ย่อย เช่น 'create'
             $parts = explode('.', $key);
             if (isset($parts[1])) {
                 $candidateKeys[] = $parts[1];
@@ -176,27 +164,23 @@ if (! function_exists('navbar_resolve_label')) {
 
         $candidateKeys = array_values(array_unique(array_filter($candidateKeys)));
 
-        // ค้นหาในไฟล์ประจำโมดูล
         foreach ($candidateKeys as $cKey) {
             $text = lang("{$file}.{$cKey}");
             if ($text !== "{$file}.{$cKey}") {
                 return $text;
             }
 
-            // ลอง fallback ภาษาไทย
             $textTh = lang("{$file}.{$cKey}", [], 'th');
             if ($textTh !== "{$file}.{$cKey}") {
                 return $textTh;
             }
 
-            // ลอง fallback ภาษาอังกฤษ
             $textEn = lang("{$file}.{$cKey}", [], 'en');
             if ($textEn !== "{$file}.{$cKey}") {
                 return $textEn;
             }
         }
 
-        // Fallback: แปลง slug/key เป็น Title Case ที่อ่านง่าย
         return ucwords(str_replace(['.', '_', '-'], ' ', $key));
     }
 }
@@ -223,16 +207,18 @@ if (! function_exists('navbar_build_attrs')) {
     }
 }
 
-if (! function_exists('navLink')) {
+if (! function_exists('_navbar_render')) {
     /**
-     * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.nav-link`
-     * ตรวจสอบสิทธิ์แบบ Permission-First อัตโนมัติ (ไม่แสดงหากไม่มีสิทธิ์)
+     * Core Renderer ร่วมสำหรับ navLink, navItem, dropdownItem, navButton
+     * ป้องกันโค้ดซ้ำซ้อน (DRY) และรวมการตรวจสอบความปลอดภัย / XSS ไว้ที่เดียว
      *
-     * @param string $permission ชื่อสิทธิ์หรือโมดูล เช่น 'sales', 'sale.create.branch'
-     * @param string|array<string, mixed> $urlOrOptions URL หรือ array ตัวเลือก
-     * @param array<string, mixed> $options ตัวเลือกเพิ่มเติม
+     * @internal
+     * @param string $type ประเภทการแสดงผล 'nav-link', 'nav-item', 'dropdown-item', 'button'
+     * @param string $permission ชื่อสิทธิ์หรือโมดูล
+     * @param string|array<string, mixed> $urlOrOptions URL หรือ array options
+     * @param array<string, mixed> $options
      */
-    function navLink(string $permission, $urlOrOptions = '#', array $options = []): string
+    function _navbar_render(string $type, string $permission, $urlOrOptions = '#', array $options = []): string
     {
         if (is_array($urlOrOptions)) {
             $options = array_merge($urlOrOptions, $options);
@@ -241,7 +227,7 @@ if (! function_exists('navLink')) {
             $url = $urlOrOptions;
         }
 
-        // 1. ตรวจสอบสิทธิ์
+        // 1. ตรวจสอบสิทธิ์แบบ Contextual RBAC (Permission-First)
         $targetPermission = navbar_resolve_module($permission);
         if (! auth_can($targetPermission)) {
             return '';
@@ -263,29 +249,72 @@ if (! function_exists('navLink')) {
             $targetUrl = preg_match('/^(https?:\/\/|\/\/|#|javascript:)/i', $url) ? $url : site_url(ltrim($url, '/'));
         }
 
-        // 4. Classes & Attributes
-        $extraClass = trim((string) ($options['class'] ?? ''));
-        $linkClass  = trim('nav-link ' . $extraClass);
+        // 4. Custom Attributes & Classes
         $customAttrs = navbar_build_attrs($options['attrs'] ?? []);
+        $extraClass  = trim((string) ($options['class'] ?? ''));
 
-        // 5. Icon & Badge
-        $iconHtml = $icon ? '<i class="' . esc($icon) . ' me-2"></i>' : '';
+        // 5. Icon & Badge HTML
+        $spacing  = ($type === 'button' || $type === 'btn') ? 'me-1' : 'me-2';
+        $iconHtml = $icon ? '<i class="' . esc($icon) . ' ' . $spacing . '"></i>' : '';
+
         $badgeHtml = '';
         if (! empty($options['badge'])) {
-            if (is_string($options['badge'])) {
-                $badgeHtml = ' <span class="badge bg-danger ms-1">' . esc($options['badge']) . '</span>';
-            } elseif (is_array($options['badge'])) {
-                $bText  = $options['badge']['text'] ?? '';
-                $bClass = $options['badge']['class'] ?? 'bg-danger';
-                if ($bText !== '') {
-                    $badgeHtml = ' <span class="badge ' . esc($bClass) . ' ms-1">' . esc($bText) . '</span>';
-                }
+            $bText  = is_array($options['badge']) ? ($options['badge']['text'] ?? '') : (string) $options['badge'];
+            $bClass = is_array($options['badge']) ? ($options['badge']['class'] ?? 'bg-danger') : 'bg-danger';
+            if ($bText !== '') {
+                $badgeHtml = ' <span class="badge ' . esc($bClass) . ' ms-1">' . esc($bText) . '</span>';
             }
         }
 
-        return '<a href="' . esc($targetUrl) . '" class="' . esc($linkClass) . '"' . $customAttrs . '>'
-            . $iconHtml . '<span>' . esc($label) . '</span>' . $badgeHtml
-            . '</a>';
+        $safeUrl   = esc($targetUrl);
+        $safeLabel = esc($label);
+
+        // 6. พ่น DOM ตามประเภทที่เลือก
+        switch ($type) {
+            case 'button':
+            case 'btn':
+                $btnClass = $extraClass !== '' ? $extraClass : 'btn btn-primary btn-sm';
+                return '<a href="' . $safeUrl . '" class="' . esc($btnClass) . '"' . $customAttrs . '>'
+                    . $iconHtml . '<span>' . $safeLabel . '</span>' . $badgeHtml
+                    . '</a>';
+
+            case 'dropdown-item':
+                $itemClass = trim('dropdown-item ' . $extraClass);
+                $dom = '<a href="' . $safeUrl . '" class="' . esc($itemClass) . '"' . $customAttrs . '>'
+                    . $iconHtml . '<span>' . $safeLabel . '</span>' . $badgeHtml
+                    . '</a>';
+                return ! empty($options['wrapper']) ? '<li>' . $dom . '</li>' : $dom;
+
+            case 'nav-item':
+            case 'nav-link':
+            default:
+                $linkClass = trim('nav-link ' . $extraClass);
+                $linkDom   = '<a href="' . $safeUrl . '" class="' . esc($linkClass) . '"' . $customAttrs . '>'
+                    . $iconHtml . '<span>' . $safeLabel . '</span>' . $badgeHtml
+                    . '</a>';
+
+                $shouldWrap = ($type === 'nav-item') || ! empty($options['wrapper']);
+                if (isset($options['wrapper']) && $options['wrapper'] === false) {
+                    $shouldWrap = false;
+                }
+
+                if ($shouldWrap) {
+                    $itemClass = trim('nav-item ' . ($options['itemClass'] ?? ''));
+                    return '<li class="' . esc($itemClass) . '">' . $linkDom . '</li>';
+                }
+
+                return $linkDom;
+        }
+    }
+}
+
+if (! function_exists('navLink')) {
+    /**
+     * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.nav-link`
+     */
+    function navLink(string $permission, $urlOrOptions = '#', array $options = []): string
+    {
+        return _navbar_render('nav-link', $permission, $urlOrOptions, $options);
     }
 }
 
@@ -293,160 +322,36 @@ if (! function_exists('navItem')) {
     /**
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.nav-item`
      * พ่น <li class="nav-item"><a class="nav-link" ...>...</a></li>
-     *
-     * @param string $permission ชื่อสิทธิ์หรือโมดูล เช่น 'sales', 'users'
-     * @param string|array<string, mixed> $urlOrOptions URL หรือ array ตัวเลือก
-     * @param array<string, mixed> $options ตัวเลือกเพิ่มเติม
-     *   - 'itemClass': คลาสสำหรับ <li>
-     *   - 'wrapper': ถ้าส่ง false จะพ่นเฉพาะ <a> (เช่นเดียวกับ navLink)
      */
     function navItem(string $permission, $urlOrOptions = '#', array $options = []): string
     {
-        if (is_array($urlOrOptions)) {
-            $options = array_merge($urlOrOptions, $options);
-        }
-
-        $linkDom = navLink($permission, $urlOrOptions, $options);
-        if ($linkDom === '') {
-            return '';
-        }
-
-        if (isset($options['wrapper']) && $options['wrapper'] === false) {
-            return $linkDom;
-        }
-
-        $itemClass = trim('nav-item ' . ($options['itemClass'] ?? ''));
-
-        return '<li class="' . esc($itemClass) . '">' . $linkDom . '</li>';
+        return _navbar_render('nav-item', $permission, $urlOrOptions, $options);
     }
 }
 
 if (! function_exists('dropdownItem')) {
     /**
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.dropdown-item`
-     *
-     * @param string $permission ชื่อสิทธิ์หรือโมดูล
-     * @param string|array<string, mixed> $urlOrOptions URL หรือ array ตัวเลือก
-     * @param array<string, mixed> $options ตัวเลือกเพิ่มเติม
      */
     function dropdownItem(string $permission, $urlOrOptions = '#', array $options = []): string
     {
-        if (is_array($urlOrOptions)) {
-            $options = array_merge($urlOrOptions, $options);
-            $url     = $options['url'] ?? '#';
-        } else {
-            $url = $urlOrOptions;
-        }
-
-        $targetPermission = navbar_resolve_module($permission);
-        if (! auth_can($targetPermission)) {
-            return '';
-        }
-
-        $label = navbar_resolve_label($permission, $options['label'] ?? null);
-
-        $icon = null;
-        if (! array_key_exists('icon', $options)) {
-            $icon = navbar_default_icon($permission);
-        } elseif ($options['icon'] !== false && $options['icon'] !== null && $options['icon'] !== '') {
-            $icon = (string) $options['icon'];
-        }
-
-        $targetUrl = '#';
-        if ($url !== '#' && $url !== '') {
-            $targetUrl = preg_match('/^(https?:\/\/|\/\/|#|javascript:)/i', $url) ? $url : site_url(ltrim($url, '/'));
-        }
-
-        $extraClass  = trim((string) ($options['class'] ?? ''));
-        $itemClass   = trim('dropdown-item ' . $extraClass);
-        $customAttrs = navbar_build_attrs($options['attrs'] ?? []);
-        $iconHtml    = $icon ? '<i class="' . esc($icon) . ' me-2"></i>' : '';
-
-        $badgeHtml = '';
-        if (! empty($options['badge'])) {
-            $bText  = is_array($options['badge']) ? ($options['badge']['text'] ?? '') : (string) $options['badge'];
-            $bClass = is_array($options['badge']) ? ($options['badge']['class'] ?? 'bg-danger') : 'bg-danger';
-            if ($bText !== '') {
-                $badgeHtml = ' <span class="badge ' . esc($bClass) . ' ms-1">' . esc($bText) . '</span>';
-            }
-        }
-
-        $dom = '<a href="' . esc($targetUrl) . '" class="' . esc($itemClass) . '"' . $customAttrs . '>'
-            . $iconHtml . '<span>' . esc($label) . '</span>' . $badgeHtml
-            . '</a>';
-
-        if (! empty($options['wrapper'])) {
-            return '<li>' . $dom . '</li>';
-        }
-
-        return $dom;
+        return _navbar_render('dropdown-item', $permission, $urlOrOptions, $options);
     }
 }
 
 if (! function_exists('navButton')) {
     /**
-     * สร้าง HTML สำหรับปุ่ม Action Button ใน Page Header หรือเนื้อหา (AdminLTE / Bootstrap Native `.btn`)
-     *
-     * @param string $permission ชื่อสิทธิ์หรือโมดูล
-     * @param string|array<string, mixed> $urlOrOptions URL หรือ array ตัวเลือก
-     * @param array<string, mixed> $options ตัวเลือกเพิ่มเติม
+     * สร้าง HTML สำหรับปุ่ม Action Button (AdminLTE / Bootstrap Native `.btn`)
      */
     function navButton(string $permission, $urlOrOptions = '#', array $options = []): string
     {
-        if (is_array($urlOrOptions)) {
-            $options = array_merge($urlOrOptions, $options);
-            $url     = $options['url'] ?? '#';
-        } else {
-            $url = $urlOrOptions;
-        }
-
-        $targetPermission = navbar_resolve_module($permission);
-        if (! auth_can($targetPermission)) {
-            return '';
-        }
-
-        $label = navbar_resolve_label($permission, $options['label'] ?? null);
-
-        $icon = null;
-        if (! array_key_exists('icon', $options)) {
-            $icon = navbar_default_icon($permission);
-        } elseif ($options['icon'] !== false && $options['icon'] !== null && $options['icon'] !== '') {
-            $icon = (string) $options['icon'];
-        }
-
-        $targetUrl = '#';
-        if ($url !== '#' && $url !== '') {
-            $targetUrl = preg_match('/^(https?:\/\/|\/\/|#|javascript:)/i', $url) ? $url : site_url(ltrim($url, '/'));
-        }
-
-        $extraClass  = trim((string) ($options['class'] ?? ''));
-        $btnClass    = $extraClass !== '' ? $extraClass : 'btn btn-primary btn-sm';
-        $customAttrs = navbar_build_attrs($options['attrs'] ?? []);
-        $iconHtml    = $icon ? '<i class="' . esc($icon) . ' me-1"></i>' : '';
-
-        $badgeHtml = '';
-        if (! empty($options['badge'])) {
-            $bText  = is_array($options['badge']) ? ($options['badge']['text'] ?? '') : (string) $options['badge'];
-            $bClass = is_array($options['badge']) ? ($options['badge']['class'] ?? 'bg-danger') : 'bg-danger';
-            if ($bText !== '') {
-                $badgeHtml = ' <span class="badge ' . esc($bClass) . ' ms-1">' . esc($bText) . '</span>';
-            }
-        }
-
-        return '<a href="' . esc($targetUrl) . '" class="' . esc($btnClass) . '"' . $customAttrs . '>'
-            . $iconHtml . '<span>' . esc($label) . '</span>' . $badgeHtml
-            . '</a>';
+        return _navbar_render('button', $permission, $urlOrOptions, $options);
     }
 }
 
 if (! function_exists('navbar')) {
     /**
      * ฟังก์ชันแม่แบบอเนกประสงค์ (Smart Wrapper / Alias)
-     * สลับการทำงานไปยัง navItem(), navLink(), dropdownItem() หรือ navButton() ตาม option 'as'
-     *
-     * @param string $permission ชื่อสิทธิ์หรือโมดูล
-     * @param string|array<string, mixed> $urlOrOptions URL หรือ array ตัวเลือก
-     * @param array<string, mixed> $options ตัวเลือกเพิ่มเติม ('as' => 'nav-item' | 'nav-link' | 'dropdown-item' | 'button')
      */
     function navbar(string $permission, $urlOrOptions = '#', array $options = []): string
     {
@@ -456,36 +361,13 @@ if (! function_exists('navbar')) {
 
         $as = strtolower((string) ($options['as'] ?? $options['type'] ?? 'nav-link'));
 
-        switch ($as) {
-            case 'nav-item':
-                return navItem($permission, $urlOrOptions, $options);
-
-            case 'button':
-            case 'btn':
-                return navButton($permission, $urlOrOptions, $options);
-
-            case 'dropdown-item':
-                return dropdownItem($permission, $urlOrOptions, $options);
-
-            case 'link':
-            case 'a':
-            case 'nav-link':
-            default:
-                if (! empty($options['wrapper'])) {
-                    return navItem($permission, $urlOrOptions, $options);
-                }
-                return navLink($permission, $urlOrOptions, $options);
-        }
+        return _navbar_render($as, $permission, $urlOrOptions, $options);
     }
 }
 
 if (! function_exists('pageTitle')) {
     /**
      * แสดงผล Title, Subtitle และ Icon ของหน้าจอในรูปแบบ AdminLTE 4 Content Header
-     *
-     * @param string $title ชื่อหลักของหน้าจอ เช่น 'ภาพรวมระบบและการขาย'
-     * @param string $subtitle คำอธิบายสั้นๆ ใต้ชื่อหน้า
-     * @param string $icon คลาสไอคอน เช่น 'bi bi-speedometer2'
      */
     function pageTitle(string $title, string $subtitle = '', string $icon = ''): string
     {
@@ -511,15 +393,6 @@ if (! function_exists('pageTitle')) {
 if (! function_exists('breadcrumb')) {
     /**
      * แสดงผล Breadcrumb ตามมาตรฐาน Bootstrap 5 / AdminLTE 4
-     *
-     * ตัวอย่าง:
-     * breadcrumb([
-     *     'หน้าหลัก' => 'dashboard',
-     *     'การขาย'   => 'admin/sales',
-     *     'เปิดบิล'  => null, // null คือหน้าปัจจุบัน
-     * ])
-     *
-     * @param array<string, string|null> $items
      */
     function breadcrumb(array $items): string
     {
@@ -553,12 +426,6 @@ if (! function_exists('breadcrumb')) {
 if (! function_exists('pageHeader')) {
     /**
      * ควบคุมและแสดงผลส่วน AdminLTE `.app-content-header` ทั้งหมด (Title, Actions และ Breadcrumb)
-     *
-     * @param string|null $title ชื่อหน้าจอ
-     * @param string|null $subtitle คำอธิบายหน้าจอ
-     * @param string|null $icon ไอคอนหน้าจอ
-     * @param array<string, string|null>|null $breadcrumbs รายการ Breadcrumbs
-     * @param list<string>|string|null $actions รายการปุ่ม Action ฝั่งขวา (สร้างจาก navButton() หรือ string HTML)
      */
     function pageHeader(
         ?string $title = null,
