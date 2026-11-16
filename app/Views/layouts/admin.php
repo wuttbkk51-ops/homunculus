@@ -31,10 +31,10 @@
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
         <!-- App Header (Navbar) -->
-        <?= $this->include('partials/admin_navbar') ?>
+        <?= $this->include('layouts/partials/admin_navbar') ?>
 
         <!-- App Sidebar -->
-        <?= $this->include('partials/admin_sidebar') ?>
+        <?= $this->include('layouts/partials/admin_sidebar') ?>
 
         <!-- Main Content Area -->
         <main class="app-main">
@@ -56,7 +56,7 @@
             <div class="app-content pb-4">
                 <div class="container-fluid">
                     <!-- Session Flash Messages / Alerts -->
-                    <?= $this->include('partials/alerts') ?>
+                    <?= $this->include('layouts/partials/alerts') ?>
 
                     <!-- Dynamic Page Content -->
                     <?= $this->renderSection('content') ?>
@@ -65,7 +65,7 @@
         </main>
 
         <!-- App Footer -->
-        <?= $this->include('partials/admin_footer') ?>
+        <?= $this->include('layouts/partials/admin_footer') ?>
     </div>
 
     <!-- Core Scripts (AdminLTE 4 & Bootstrap 5 Native) -->
