@@ -126,6 +126,48 @@ final class NavbarHelperTest extends CIUnitTestCase
     }
 
     /**
+     * ทดสอบปุ่มหรือลิงก์ที่ไม่ต้องตรวจสอบสิทธิ์ (permission = null หรือ auth = false)
+     * เช่น ลิงก์สาธารณะ, ปุ่มย้อนกลับ, ปุ่มออกจากระบบ
+     */
+    public function testHelpersWithoutAuthCheck(): void
+    {
+        // แม้ยังไม่ได้ล็อกอิน ฟังก์ชันต้องพ่น HTML DOM ออกมาได้ตามปกติ
+        $btn = navButton(null, 'admin/back', [
+            'label' => 'ย้อนกลับ',
+            'icon'  => 'bi bi-arrow-left',
+            'class' => 'btn btn-secondary btn-sm',
+        ]);
+        $this->assertNotEmpty($btn);
+        $this->assertStringContainsString('admin/back', $btn);
+        $this->assertStringContainsString('ย้อนกลับ', $btn);
+        $this->assertStringContainsString('bi bi-arrow-left', $btn);
+        $this->assertStringContainsString('btn-secondary', $btn);
+
+        // navLink โดยไม่ต้องเช็คสิทธิ์
+        $link = navLink(null, '/', ['label' => 'หน้าเว็บไซต์', 'icon' => 'bi bi-globe']);
+        $this->assertNotEmpty($link);
+        $this->assertStringContainsString('class="nav-link"', $link);
+        $this->assertStringContainsString('หน้าเว็บไซต์', $link);
+
+        // dropdownItem ออกจากระบบ (wrapper = true)
+        $drop = dropdownItem(null, 'logout', [
+            'label'   => 'ออกจากระบบ',
+            'icon'    => 'bi bi-box-arrow-right',
+            'wrapper' => true,
+        ]);
+        $this->assertStringStartsWith('<li><a href="', $drop);
+        $this->assertStringContainsString('class="dropdown-item"', $drop);
+        $this->assertStringContainsString('ออกจากระบบ', $drop);
+        $this->assertStringEndsWith('</li>', $drop);
+
+        // navItem แบบระบุ module แต่ข้ามการเช็คสิทธิ์ด้วย auth = false
+        $unauthItem = navItem('sales', 'admin/sales', ['auth' => false]);
+        $this->assertNotEmpty($unauthItem);
+        $this->assertStringContainsString('class="nav-link"', $unauthItem);
+        $this->assertStringContainsString('การขาย', $unauthItem);
+    }
+
+    /**
      * ทดสอบเมื่อผู้ใช้มีสิทธิ์ (SuperAdmin) navbar() ต้องพ่น HTML DOM ที่ถูกต้องตาม options
      */
     public function testNavbarRendersDomForAuthorizedUser(): void

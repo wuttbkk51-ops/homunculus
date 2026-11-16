@@ -210,15 +210,16 @@ if (! function_exists('navbar_build_attrs')) {
 if (! function_exists('_navbar_render')) {
     /**
      * Core Renderer ร่วมสำหรับ navLink, navItem, dropdownItem, navButton
+     * รองรับทั้งกรณีตรวจสอบสิทธิ์แบบ Permission-First และกรณีที่ไม่ต้องตรวจสอบสิทธิ์ (auth => false หรือ permission => null)
      * ป้องกันโค้ดซ้ำซ้อน (DRY) และรวมการตรวจสอบความปลอดภัย / XSS ไว้ที่เดียว
      *
      * @internal
      * @param string $type ประเภทการแสดงผล 'nav-link', 'nav-item', 'dropdown-item', 'button'
-     * @param string $permission ชื่อสิทธิ์หรือโมดูล
+     * @param string|null $permission ชื่อสิทธิ์หรือโมดูล (ส่ง null เพื่อข้ามการเช็คสิทธิ์)
      * @param string|array<string, mixed> $urlOrOptions URL หรือ array options
-     * @param array<string, mixed> $options
+     * @param array<string, mixed> $options ตัวเลือกเพิ่มเติม
      */
-    function _navbar_render(string $type, string $permission, $urlOrOptions = '#', array $options = []): string
+    function _navbar_render(string $type, ?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         if (is_array($urlOrOptions)) {
             $options = array_merge($urlOrOptions, $options);
@@ -227,18 +228,23 @@ if (! function_exists('_navbar_render')) {
             $url = $urlOrOptions;
         }
 
-        // 1. ตรวจสอบสิทธิ์แบบ Contextual RBAC (Permission-First)
-        $targetPermission = navbar_resolve_module($permission);
-        if (! auth_can($targetPermission)) {
-            return '';
+        // 1. ตรวจสอบสิทธิ์แบบ Contextual RBAC (ถ้าไม่ได้ส่ง permission หรือตั้ง 'auth' => false ให้ข้ามการตรวจสิทธิ์)
+        $requireAuth = $options['auth'] ?? true;
+        if ($requireAuth && $permission !== null && $permission !== '' && $permission !== '*' && $permission !== 'public') {
+            $targetPermission = navbar_resolve_module($permission);
+            if (! auth_can($targetPermission)) {
+                return '';
+            }
         }
 
         // 2. Resolve Label & Icon
-        $label = navbar_resolve_label($permission, $options['label'] ?? null);
+        $label = ($permission !== null && $permission !== '')
+            ? navbar_resolve_label($permission, $options['label'] ?? null)
+            : ($options['label'] ?? '');
 
         $icon = null;
         if (! array_key_exists('icon', $options)) {
-            $icon = navbar_default_icon($permission);
+            $icon = ($permission !== null && $permission !== '') ? navbar_default_icon($permission) : null;
         } elseif ($options['icon'] !== false && $options['icon'] !== null && $options['icon'] !== '') {
             $icon = (string) $options['icon'];
         }
@@ -311,8 +317,9 @@ if (! function_exists('_navbar_render')) {
 if (! function_exists('navLink')) {
     /**
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.nav-link`
+     * ส่ง $permission เป็น null หรือใส่ 'auth' => false สำหรับลิงก์ทั่วไปที่ไม่ต้องเช็คสิทธิ์
      */
-    function navLink(string $permission, $urlOrOptions = '#', array $options = []): string
+    function navLink(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         return _navbar_render('nav-link', $permission, $urlOrOptions, $options);
     }
@@ -322,8 +329,9 @@ if (! function_exists('navItem')) {
     /**
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.nav-item`
      * พ่น <li class="nav-item"><a class="nav-link" ...>...</a></li>
+     * ส่ง $permission เป็น null หรือใส่ 'auth' => false สำหรับเมนูทั่วไปที่ไม่ต้องเช็คสิทธิ์
      */
-    function navItem(string $permission, $urlOrOptions = '#', array $options = []): string
+    function navItem(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         return _navbar_render('nav-item', $permission, $urlOrOptions, $options);
     }
@@ -332,8 +340,9 @@ if (! function_exists('navItem')) {
 if (! function_exists('dropdownItem')) {
     /**
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.dropdown-item`
+     * ส่ง $permission เป็น null หรือใส่ 'auth' => false สำหรับเมนูย่อยทั่วไปที่ไม่ต้องเช็คสิทธิ์
      */
-    function dropdownItem(string $permission, $urlOrOptions = '#', array $options = []): string
+    function dropdownItem(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         return _navbar_render('dropdown-item', $permission, $urlOrOptions, $options);
     }
@@ -342,8 +351,9 @@ if (! function_exists('dropdownItem')) {
 if (! function_exists('navButton')) {
     /**
      * สร้าง HTML สำหรับปุ่ม Action Button (AdminLTE / Bootstrap Native `.btn`)
+     * ส่ง $permission เป็น null หรือใส่ 'auth' => false สำหรับปุ่มทั่วไปที่ไม่ต้องเช็คสิทธิ์
      */
-    function navButton(string $permission, $urlOrOptions = '#', array $options = []): string
+    function navButton(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         return _navbar_render('button', $permission, $urlOrOptions, $options);
     }
@@ -353,7 +363,7 @@ if (! function_exists('navbar')) {
     /**
      * ฟังก์ชันแม่แบบอเนกประสงค์ (Smart Wrapper / Alias)
      */
-    function navbar(string $permission, $urlOrOptions = '#', array $options = []): string
+    function navbar(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         if (is_array($urlOrOptions)) {
             $options = array_merge($urlOrOptions, $options);
@@ -476,28 +486,28 @@ if (! function_exists('pageHeader')) {
 // Backward Compatibility & Style Aliases (CamelCase & Snake_case)
 // --------------------------------------------------------------------------
 if (! function_exists('nav_item')) {
-    function nav_item(string $permission, $urlOrOptions = '#', array $options = []): string
+    function nav_item(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         return navItem($permission, $urlOrOptions, $options);
     }
 }
 
 if (! function_exists('nav_link')) {
-    function nav_link(string $permission, $urlOrOptions = '#', array $options = []): string
+    function nav_link(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         return navLink($permission, $urlOrOptions, $options);
     }
 }
 
 if (! function_exists('dropdown_item')) {
-    function dropdown_item(string $permission, $urlOrOptions = '#', array $options = []): string
+    function dropdown_item(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         return dropdownItem($permission, $urlOrOptions, $options);
     }
 }
 
 if (! function_exists('nav_button')) {
-    function nav_button(string $permission, $urlOrOptions = '#', array $options = []): string
+    function nav_button(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         return navButton($permission, $urlOrOptions, $options);
     }

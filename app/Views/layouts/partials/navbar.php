@@ -12,11 +12,13 @@ $activeBranchId = active_branch_id();
                     <i class="bi bi-list fs-4"></i>
                 </a>
             </li>
-            <li class="nav-item d-none d-md-block">
-                <a href="<?= site_url('/') ?>" class="nav-link text-body-secondary" target="_blank" title="เปิดหน้าเว็บไซต์สาธารณะ">
-                    <i class="bi bi-box-arrow-up-right me-1"></i>หน้าเว็บไซต์
-                </a>
-            </li>
+            <?= navItem(null, '/', [
+                'label'     => 'หน้าเว็บไซต์',
+                'icon'      => 'bi bi-box-arrow-up-right',
+                'class'     => 'text-body-secondary',
+                'itemClass' => 'd-none d-md-block',
+                'attrs'     => ['target' => '_blank', 'title' => 'เปิดหน้าเว็บไซต์สาธารณะ'],
+            ]) ?>
         </ul>
 
         <!-- ฝั่งขวา: Theme Switcher, Branch Switcher & User Dropdown -->
@@ -93,11 +95,12 @@ $activeBranchId = active_branch_id();
                         </span>
                     </li>
                     <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <a class="dropdown-item text-danger" href="<?= site_url('logout') ?>">
-                            <i class="bi bi-box-arrow-right me-2"></i>ออกจากระบบ
-                        </a>
-                    </li>
+                    <?= dropdownItem(null, 'logout', [
+                        'label'   => 'ออกจากระบบ',
+                        'icon'    => 'bi bi-box-arrow-right',
+                        'class'   => 'text-danger',
+                        'wrapper' => true,
+                    ]) ?>
                 </ul>
             </li>
         </ul>
