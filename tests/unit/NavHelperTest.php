@@ -11,12 +11,12 @@ use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\DatabaseTestTrait;
 
 /**
- * Unit Test สำหรับ navbar_helper.php
- * ทดสอบการทำงานของ navbar(), module mapping, default icon, i18n, และ page header / breadcrumbs
+ * Unit Test สำหรับ nav_helper.php
+ * ทดสอบการทำงานของ navItem, navLink, dropdownItem, navButton, sidebarMenu, breadcrumb, pageHeader
  *
  * @internal
  */
-final class NavbarHelperTest extends CIUnitTestCase
+final class NavHelperTest extends CIUnitTestCase
 {
     use DatabaseTestTrait;
 
@@ -28,7 +28,7 @@ final class NavbarHelperTest extends CIUnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        helper(['auth', 'navbar']);
+        helper(['auth', 'nav']);
     }
 
     protected function tearDown(): void
@@ -318,5 +318,14 @@ final class NavbarHelperTest extends CIUnitTestCase
         $this->assertStringContainsString('app-content-header', $headerHtml);
         $this->assertStringContainsString('หัวข้อ', $headerHtml);
         $this->assertStringContainsString($btnHtml, $headerHtml);
+
+        // 7. sidebarMenu() -> ทดสอบ Sidebar Treeview และ Dynamic Language/Icon Fetching
+        $sidebarHtml = sidebarMenu();
+        $this->assertStringContainsString('sidebar-menu', $sidebarHtml);
+        $this->assertStringContainsString('แดชบอร์ด', $sidebarHtml);
+        $this->assertStringContainsString('การขาย &amp; POS', $sidebarHtml);
+        $this->assertStringContainsString('bi bi-cart3', $sidebarHtml);
+        $this->assertStringContainsString('สินค้า &amp; สต็อก', $sidebarHtml);
+        $this->assertStringContainsString('bi bi-box-seam', $sidebarHtml);
     }
 }

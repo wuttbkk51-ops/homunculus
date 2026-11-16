@@ -10,7 +10,7 @@
     <!-- Sidebar Content & Navigation -->
     <div class="sidebar-wrapper">
         <nav class="mt-2">
-            <?= render_sidebar_menu() ?>
+            <?= sidebarMenu() ?>
         </nav>
     </div>
 </aside>

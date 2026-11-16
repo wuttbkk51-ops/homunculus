@@ -64,9 +64,9 @@ final class ViewRenderTest extends CIUnitTestCase
 
     public function testSidebarMenuHelperWorks(): void
     {
-        helper(['auth', 'menu']);
+        helper(['auth', 'nav']);
 
-        $menuHtml = render_sidebar_menu();
+        $menuHtml = sidebarMenu();
 
         $this->assertStringContainsString('sidebar-menu', $menuHtml);
         $this->assertStringContainsString('แดชบอร์ด', $menuHtml);

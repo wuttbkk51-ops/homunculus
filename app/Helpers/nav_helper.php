@@ -3,18 +3,18 @@
 declare(strict_types=1);
 
 /**
- * Navbar & Header Helper สำหรับ AdminLTE 4 และ Bootstrap 5
- * ฟังก์ชันสอดคล้องกับ Native Class เช่น navItem(), navLink(), dropdownItem(), navButton(), breadcrumb(), pageHeader()
- * รองรับการตรวจสอบสิทธิ์ Contextual RBAC (Permission-First), Modular i18n, Default Icons
+ * Nav Helper สำหรับ AdminLTE 4 และ Bootstrap 5
+ * รวมศูนย์ระบบ Navigation ทั้งหมด (Sidebar Treeview, Top Navbar, Page Header, Breadcrumb, Action Buttons, Dropdowns)
+ * ควบคุมสิทธิ์ด้วย Contextual RBAC (Permission-First) และดึงภาษา i18n / Default Icons อัตโนมัติ
  */
 
-if (! function_exists('navbar_resolve_module')) {
+if (! function_exists('nav_resolve_module')) {
     /**
      * แมปชื่อโมดูล (Module Key) ไปเป็น Permission Wildcard
      *
      * @internal
      */
-    function navbar_resolve_module(string $permission): string
+    function nav_resolve_module(string $permission): string
     {
         $clean = trim($permission);
         if (str_contains($clean, '.')) {
@@ -22,67 +22,67 @@ if (! function_exists('navbar_resolve_module')) {
         }
 
         $moduleMap = [
-            'sales'      => 'sale.*',
-            'sale'       => 'sale.*',
-            'pos'        => 'sale.create.branch',
-            'items'      => 'product.*',
-            'item'       => 'product.*',
-            'products'   => 'product.*',
-            'product'    => 'product.*',
-            'categories' => 'product.*',
-            'category'   => 'product.*',
-            'inventory'  => 'inventory.*',
-            'customers'  => 'customer.*',
-            'customer'   => 'customer.*',
-            'users'      => 'user.*',
-            'user'       => 'user.*',
-            'branches'   => 'branch.*',
-            'branch'     => 'branch.*',
-            'reports'    => 'report.*',
-            'report'     => 'report.*',
-            'settings'   => 'admin.settings',
-            'setting'    => 'admin.settings',
-            'tenants'    => 'tenant.*',
-            'tenant'     => 'tenant.*',
             'dashboard'  => 'admin.access',
+            'pos'        => 'sale.create.branch',
+            'sale'       => 'sale.*',
+            'sales'      => 'sale.*',
+            'item'       => 'product.*',
+            'items'      => 'product.*',
+            'product'    => 'product.*',
+            'products'   => 'product.*',
+            'category'   => 'product.*',
+            'categories' => 'product.*',
+            'inventory'  => 'inventory.*',
+            'customer'   => 'customer.*',
+            'customers'  => 'customer.*',
+            'user'       => 'user.*',
+            'users'      => 'user.*',
+            'branch'     => 'branch.*',
+            'branches'   => 'branch.*',
+            'report'     => 'report.*',
+            'reports'    => 'report.*',
+            'setting'    => 'admin.settings',
+            'settings'   => 'admin.settings',
+            'tenant'     => 'tenant.*',
+            'tenants'    => 'tenant.*',
         ];
 
         return $moduleMap[strtolower($clean)] ?? (strtolower($clean) . '.*');
     }
 }
 
-if (! function_exists('navbar_default_icon')) {
+if (! function_exists('nav_default_icon')) {
     /**
      * ค้นหาไอคอนเริ่มต้นประจำโมดูล (Default Module Icon)
      *
      * @internal
      */
-    function navbar_default_icon(string $permission): string
+    function nav_default_icon(string $permission): string
     {
         $icons = [
-            'sales'      => 'bi bi-cart3',
-            'sale'       => 'bi bi-cart3',
-            'pos'        => 'bi bi-shop',
-            'items'      => 'bi bi-box-seam',
-            'item'       => 'bi bi-box-seam',
-            'products'   => 'bi bi-box-seam',
-            'product'    => 'bi bi-box-seam',
-            'categories' => 'bi bi-tags',
-            'category'   => 'bi bi-tags',
-            'inventory'  => 'bi bi-boxes',
-            'customers'  => 'bi bi-people',
-            'customer'   => 'bi bi-people',
-            'users'      => 'bi bi-person-gear',
-            'user'       => 'bi bi-person-gear',
-            'branches'   => 'bi bi-building',
-            'branch'     => 'bi bi-building',
-            'reports'    => 'bi bi-graph-up-arrow',
-            'report'     => 'bi bi-graph-up-arrow',
-            'settings'   => 'bi bi-gear',
-            'setting'    => 'bi bi-gear',
-            'tenants'    => 'bi bi-buildings',
-            'tenant'     => 'bi bi-buildings',
             'dashboard'  => 'bi bi-speedometer2',
+            'pos'        => 'bi bi-shop',
+            'sale'       => 'bi bi-cart3',
+            'sales'      => 'bi bi-cart3',
+            'item'       => 'bi bi-box-seam',
+            'items'      => 'bi bi-box-seam',
+            'product'    => 'bi bi-box-seam',
+            'products'   => 'bi bi-box-seam',
+            'category'   => 'bi bi-tags',
+            'categories' => 'bi bi-tags',
+            'inventory'  => 'bi bi-boxes',
+            'customer'   => 'bi bi-people',
+            'customers'  => 'bi bi-people',
+            'user'       => 'bi bi-person-gear',
+            'users'      => 'bi bi-person-gear',
+            'branch'     => 'bi bi-building',
+            'branches'   => 'bi bi-building',
+            'report'     => 'bi bi-graph-up-arrow',
+            'reports'    => 'bi bi-graph-up-arrow',
+            'setting'    => 'bi bi-gear',
+            'settings'   => 'bi bi-gear',
+            'tenant'     => 'bi bi-buildings',
+            'tenants'    => 'bi bi-buildings',
         ];
 
         $lowerKey = strtolower(trim($permission));
@@ -96,14 +96,13 @@ if (! function_exists('navbar_default_icon')) {
     }
 }
 
-if (! function_exists('navbar_resolve_module_file')) {
+if (! function_exists('nav_resolve_module_file')) {
     /**
      * ค้นหาชื่อไฟล์ภาษาตาม Module Key หรือ Permission
-     * เช่น sales -> Sales, items -> Items, sale.create.branch -> Sales
      *
      * @internal
      */
-    function navbar_resolve_module_file(string $permission): string
+    function nav_resolve_module_file(string $permission): string
     {
         $clean  = strtolower(trim($permission));
         $prefix = str_contains($clean, '.') ? explode('.', $clean)[0] : $clean;
@@ -120,6 +119,8 @@ if (! function_exists('navbar_resolve_module_file')) {
             'category'   => 'Items',
             'categories' => 'Items',
             'inventory'  => 'Items',
+            'customer'   => 'Sales',
+            'customers'  => 'Sales',
             'user'       => 'Users',
             'users'      => 'Users',
             'report'     => 'Reports',
@@ -135,21 +136,21 @@ if (! function_exists('navbar_resolve_module_file')) {
     }
 }
 
-if (! function_exists('navbar_resolve_label')) {
+if (! function_exists('nav_resolve_label')) {
     /**
      * ดึงข้อความ Label อัตโนมัติจากไฟล์ระบบภาษาแยกตามโมดูล
      * กติกา: ดึงตรงตามชื่อ key เช่น navItem('dashboard') -> lang('Dashboard.dashboard')
      *
      * @internal
      */
-    function navbar_resolve_label(string $permission, ?string $customLabel = null): string
+    function nav_resolve_label(string $permission, ?string $customLabel = null): string
     {
         if ($customLabel !== null && $customLabel !== '') {
             return $customLabel;
         }
 
         $key  = trim($permission);
-        $file = navbar_resolve_module_file($key);
+        $file = nav_resolve_module_file($key);
 
         $candidateKeys = [$key, strtolower($key)];
 
@@ -185,14 +186,14 @@ if (! function_exists('navbar_resolve_label')) {
     }
 }
 
-if (! function_exists('navbar_build_attrs')) {
+if (! function_exists('nav_build_attrs')) {
     /**
      * สร้างสตริง HTML Attributes จาก Array
      *
      * @internal
      * @param array<string, mixed> $attrs
      */
-    function navbar_build_attrs(array $attrs): string
+    function nav_build_attrs(array $attrs): string
     {
         $html = '';
         foreach ($attrs as $key => $val) {
@@ -207,11 +208,9 @@ if (! function_exists('navbar_build_attrs')) {
     }
 }
 
-if (! function_exists('_navbar_render')) {
+if (! function_exists('_nav_render')) {
     /**
      * Core Renderer ร่วมสำหรับ navLink, navItem, dropdownItem, navButton
-     * รองรับทั้งกรณีตรวจสอบสิทธิ์แบบ Permission-First และกรณีที่ไม่ต้องตรวจสอบสิทธิ์ (auth => false หรือ permission => null)
-     * ป้องกันโค้ดซ้ำซ้อน (DRY) และรวมการตรวจสอบความปลอดภัย / XSS ไว้ที่เดียว
      *
      * @internal
      * @param string $type ประเภทการแสดงผล 'nav-link', 'nav-item', 'dropdown-item', 'button'
@@ -219,7 +218,7 @@ if (! function_exists('_navbar_render')) {
      * @param string|array<string, mixed> $urlOrOptions URL หรือ array options
      * @param array<string, mixed> $options ตัวเลือกเพิ่มเติม
      */
-    function _navbar_render(string $type, ?string $permission = null, $urlOrOptions = '#', array $options = []): string
+    function _nav_render(string $type, ?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
         if (is_array($urlOrOptions)) {
             $options = array_merge($urlOrOptions, $options);
@@ -228,10 +227,10 @@ if (! function_exists('_navbar_render')) {
             $url = $urlOrOptions;
         }
 
-        // 1. ตรวจสอบสิทธิ์แบบ Contextual RBAC (ถ้าไม่ได้ส่ง permission หรือตั้ง 'auth' => false ให้ข้ามการตรวจสิทธิ์)
+        // 1. ตรวจสอบสิทธิ์แบบ Contextual RBAC (หากไม่ได้ระบุ permission หรือตั้ง auth => false ให้ข้ามการตรวจสิทธิ์)
         $requireAuth = $options['auth'] ?? true;
         if ($requireAuth && $permission !== null && $permission !== '' && $permission !== '*' && $permission !== 'public') {
-            $targetPermission = navbar_resolve_module($permission);
+            $targetPermission = nav_resolve_module($permission);
             if (! auth_can($targetPermission)) {
                 return '';
             }
@@ -239,12 +238,12 @@ if (! function_exists('_navbar_render')) {
 
         // 2. Resolve Label & Icon
         $label = ($permission !== null && $permission !== '')
-            ? navbar_resolve_label($permission, $options['label'] ?? null)
+            ? nav_resolve_label($permission, $options['label'] ?? null)
             : ($options['label'] ?? '');
 
         $icon = null;
         if (! array_key_exists('icon', $options)) {
-            $icon = ($permission !== null && $permission !== '') ? navbar_default_icon($permission) : null;
+            $icon = ($permission !== null && $permission !== '') ? nav_default_icon($permission) : null;
         } elseif ($options['icon'] !== false && $options['icon'] !== null && $options['icon'] !== '') {
             $icon = (string) $options['icon'];
         }
@@ -256,7 +255,7 @@ if (! function_exists('_navbar_render')) {
         }
 
         // 4. Custom Attributes & Classes
-        $customAttrs = navbar_build_attrs($options['attrs'] ?? []);
+        $customAttrs = nav_build_attrs($options['attrs'] ?? []);
         $extraClass  = trim((string) ($options['class'] ?? ''));
 
         // 5. Icon & Badge HTML
@@ -314,14 +313,17 @@ if (! function_exists('_navbar_render')) {
     }
 }
 
+// --------------------------------------------------------------------------
+// Atomic Navigation Components (AdminLTE 4 Native)
+// --------------------------------------------------------------------------
+
 if (! function_exists('navLink')) {
     /**
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.nav-link`
-     * ส่ง $permission เป็น null หรือใส่ 'auth' => false สำหรับลิงก์ทั่วไปที่ไม่ต้องเช็คสิทธิ์
      */
     function navLink(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
-        return _navbar_render('nav-link', $permission, $urlOrOptions, $options);
+        return _nav_render('nav-link', $permission, $urlOrOptions, $options);
     }
 }
 
@@ -329,33 +331,30 @@ if (! function_exists('navItem')) {
     /**
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.nav-item`
      * พ่น <li class="nav-item"><a class="nav-link" ...>...</a></li>
-     * ส่ง $permission เป็น null หรือใส่ 'auth' => false สำหรับเมนูทั่วไปที่ไม่ต้องเช็คสิทธิ์
      */
     function navItem(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
-        return _navbar_render('nav-item', $permission, $urlOrOptions, $options);
+        return _nav_render('nav-item', $permission, $urlOrOptions, $options);
     }
 }
 
 if (! function_exists('dropdownItem')) {
     /**
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.dropdown-item`
-     * ส่ง $permission เป็น null หรือใส่ 'auth' => false สำหรับเมนูย่อยทั่วไปที่ไม่ต้องเช็คสิทธิ์
      */
     function dropdownItem(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
-        return _navbar_render('dropdown-item', $permission, $urlOrOptions, $options);
+        return _nav_render('dropdown-item', $permission, $urlOrOptions, $options);
     }
 }
 
 if (! function_exists('navButton')) {
     /**
      * สร้าง HTML สำหรับปุ่ม Action Button (AdminLTE / Bootstrap Native `.btn`)
-     * ส่ง $permission เป็น null หรือใส่ 'auth' => false สำหรับปุ่มทั่วไปที่ไม่ต้องเช็คสิทธิ์
      */
     function navButton(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
-        return _navbar_render('button', $permission, $urlOrOptions, $options);
+        return _nav_render('button', $permission, $urlOrOptions, $options);
     }
 }
 
@@ -371,9 +370,13 @@ if (! function_exists('navbar')) {
 
         $as = strtolower((string) ($options['as'] ?? $options['type'] ?? 'nav-link'));
 
-        return _navbar_render($as, $permission, $urlOrOptions, $options);
+        return _nav_render($as, $permission, $urlOrOptions, $options);
     }
 }
+
+// --------------------------------------------------------------------------
+// Page Header & Breadcrumb Components
+// --------------------------------------------------------------------------
 
 if (! function_exists('pageTitle')) {
     /**
@@ -483,8 +486,259 @@ if (! function_exists('pageHeader')) {
 }
 
 // --------------------------------------------------------------------------
-// Backward Compatibility & Style Aliases (CamelCase & Snake_case)
+// Sidebar Menu & Treeview Components (AdminLTE 4)
 // --------------------------------------------------------------------------
+
+if (! function_exists('admin_menu_is_active')) {
+    /**
+     * ตรวจสอบว่าเมนูดังกล่าวตรงกับ URL หน้าปัจจุบันหรือไม่
+     */
+    function admin_menu_is_active(string $path): bool
+    {
+        $currentUri = trim(uri_string(), '/');
+        $targetUri  = trim($path, '/');
+
+        if ($currentUri === $targetUri) {
+            return true;
+        }
+
+        return $targetUri !== '' && str_starts_with($currentUri, $targetUri . '/');
+    }
+}
+
+if (! function_exists('get_admin_menu_items')) {
+    /**
+     * คืนค่าโครงสร้างเมนูทั้งหมดของระบบ Admin Sidebar
+     * สามารถระบุเฉพาะ 'permission' เพื่อให้ระบบดึง Title และ Icon อัตโนมัติได้
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    function get_admin_menu_items(): array
+    {
+        return [
+            [
+                'type'  => 'header',
+                'title' => 'ระบบหลัก',
+            ],
+            [
+                'title'      => 'แดชบอร์ด',
+                'url'        => 'dashboard',
+                'icon'       => 'bi bi-speedometer2',
+                'permission' => null, // แดชบอร์ดแสดงผลเสมอสำหรับผู้เข้าสู่ระบบ
+            ],
+            [
+                'type'  => 'header',
+                'title' => 'งานขายและคลังสินค้า',
+            ],
+            [
+                'permission' => 'sales',
+                'children'   => [
+                    [
+                        'permission' => 'sale.create.branch',
+                        'url'        => 'admin/pos',
+                        'icon'       => 'bi bi-shop',
+                    ],
+                    [
+                        'permission' => 'sale.view.*',
+                        'title'      => 'รายการขายทั้งหมด',
+                        'url'        => 'admin/sales',
+                        'icon'       => 'bi bi-receipt',
+                    ],
+                    [
+                        'permission' => 'customer.view.*',
+                        'title'      => 'ลูกค้า & สมาชิก',
+                        'url'        => 'admin/customers',
+                        'icon'       => 'bi bi-people',
+                    ],
+                ],
+            ],
+            [
+                'permission' => 'items',
+                'children'   => [
+                    [
+                        'permission' => 'product.view.all',
+                        'title'      => 'รายการสินค้า',
+                        'url'        => 'admin/products',
+                        'icon'       => 'bi bi-tags',
+                    ],
+                    [
+                        'permission' => 'product.view.all',
+                        'title'      => 'หมวดหมู่สินค้า',
+                        'url'        => 'admin/categories',
+                        'icon'       => 'bi bi-grid',
+                    ],
+                    [
+                        'permission' => 'inventory.view.*',
+                        'title'      => 'สต็อกคงเหลือ',
+                        'url'        => 'admin/inventory',
+                        'icon'       => 'bi bi-boxes',
+                    ],
+                ],
+            ],
+            [
+                'permission' => 'reports',
+                'children'   => [
+                    [
+                        'permission' => 'report.view.*',
+                        'title'      => 'รายงานยอดขาย',
+                        'url'        => 'admin/reports/sales',
+                        'icon'       => 'bi bi-cash-stack',
+                    ],
+                    [
+                        'permission' => 'report.view.*',
+                        'title'      => 'รายงานสต็อกสินค้า',
+                        'url'        => 'admin/reports/inventory',
+                        'icon'       => 'bi bi-journal-text',
+                    ],
+                ],
+            ],
+            [
+                'type'  => 'header',
+                'title' => 'ตั้งค่า & จัดการระบบ',
+            ],
+            [
+                'permission' => 'branch.view.all',
+                'title'      => 'จัดการสาขา',
+                'url'        => 'admin/branches',
+                'icon'       => 'bi bi-building',
+            ],
+            [
+                'permission' => 'users',
+                'children'   => [
+                    [
+                        'permission' => 'user.view.all',
+                        'title'      => 'รายชื่อพนักงาน',
+                        'url'        => 'admin/users',
+                        'icon'       => 'bi bi-person-lines-fill',
+                    ],
+                    [
+                        'permission' => 'user.manage.all',
+                        'title'      => 'มอบหมายและจัดการสิทธิ์',
+                        'url'        => 'admin/roles',
+                        'icon'       => 'bi bi-key',
+                    ],
+                ],
+            ],
+            [
+                'permission' => 'settings',
+                'url'        => 'admin/settings',
+            ],
+        ];
+    }
+}
+
+if (! function_exists('sidebarMenu')) {
+    /**
+     * Render โครงสร้างเมนู Sidebar ของ AdminLTE 4 โดยกรองสิทธิ์ Contextual RBAC อัตโนมัติ
+     *
+     * @param array<int, array<string, mixed>>|null $menuItems โครงสร้างเมนู (หากไม่ระบุจะดึง get_admin_menu_items())
+     */
+    function sidebarMenu(?array $menuItems = null): string
+    {
+        $items = $menuItems ?? get_admin_menu_items();
+        $html  = '<ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">' . "\n";
+
+        foreach ($items as $item) {
+            // ประเภท Header คั่นส่วน
+            if (($item['type'] ?? '') === 'header') {
+                $html .= '<li class="nav-header">' . esc($item['title'] ?? '') . '</li>' . "\n";
+                continue;
+            }
+
+            $permission = $item['permission'] ?? null;
+
+            // ตรวจสอบสิทธิ์เมนูหลัก
+            if ($permission !== null && $permission !== '' && ! auth_can(nav_resolve_module($permission))) {
+                continue;
+            }
+
+            $title = $item['title'] ?? ($permission ? nav_resolve_label($permission) : '');
+            $icon  = $item['icon'] ?? ($permission ? nav_default_icon($permission) : 'bi bi-circle');
+
+            // กรณีมีเมนูย่อย (Submenu / Treeview)
+            if (! empty($item['children'])) {
+                $visibleChildren = [];
+                $hasActiveChild  = false;
+
+                foreach ($item['children'] as $child) {
+                    $childPerm = $child['permission'] ?? null;
+                    if ($childPerm === null || $childPerm === '' || auth_can(nav_resolve_module($childPerm))) {
+                        $isActive = ! empty($child['url']) && admin_menu_is_active($child['url']);
+                        if ($isActive) {
+                            $hasActiveChild = true;
+                        }
+                        $child['_active']  = $isActive;
+                        $visibleChildren[] = $child;
+                    }
+                }
+
+                // หากไม่มีเมนูย่อยใดที่ผู้ใช้มีสิทธิ์เข้าถึง ให้ข้ามเมนูแม่
+                if (empty($visibleChildren)) {
+                    continue;
+                }
+
+                $parentActive = $hasActiveChild ? ' menu-open' : '';
+                $linkActive   = $hasActiveChild ? ' active' : '';
+                $safeIcon     = esc($icon);
+                $safeTitle    = esc($title);
+
+                $html .= "<li class=\"nav-item{$parentActive}\">\n";
+                $html .= "    <a href=\"#\" class=\"nav-link{$linkActive}\">\n";
+                $html .= "        <i class=\"nav-icon {$safeIcon}\"></i>\n";
+                $html .= "        <p>{$safeTitle}<i class=\"nav-arrow bi bi-chevron-right\"></i></p>\n";
+                $html .= "    </a>\n";
+                $html .= "    <ul class=\"nav nav-treeview\">\n";
+
+                foreach ($visibleChildren as $child) {
+                    $childActive = ! empty($child['_active']) ? ' active' : '';
+                    $childUrl    = site_url($child['url'] ?? '#');
+                    $childPerm   = $child['permission'] ?? null;
+                    $childTitle  = esc($child['title'] ?? ($childPerm ? nav_resolve_label($childPerm) : ''));
+                    $childIcon   = esc($child['icon'] ?? ($childPerm ? nav_default_icon($childPerm) : 'bi bi-circle'));
+
+                    $html .= "        <li class=\"nav-item\">\n";
+                    $html .= "            <a href=\"{$childUrl}\" class=\"nav-link{$childActive}\">\n";
+                    $html .= "                <i class=\"nav-icon {$childIcon}\"></i>\n";
+                    $html .= "                <p>{$childTitle}</p>\n";
+                    $html .= "            </a>\n";
+                    $html .= "        </li>\n";
+                }
+
+                $html .= "    </ul>\n</li>\n";
+            } else {
+                // เมนูเดี่ยว ไม่มี Submenu
+                $url       = $item['url'] ?? '#';
+                $isActive  = admin_menu_is_active($url);
+                $linkClass = 'nav-link' . ($isActive ? ' active' : '');
+                $targetUrl = site_url($url);
+                $safeIcon  = esc($icon);
+                $safeTitle = esc($title);
+
+                $html .= "<li class=\"nav-item\">\n";
+                $html .= "    <a href=\"{$targetUrl}\" class=\"{$linkClass}\">\n";
+                $html .= "        <i class=\"nav-icon {$safeIcon}\"></i>\n";
+                $html .= "        <p>{$safeTitle}</p>\n";
+                $html .= "    </a>\n";
+                $html .= "</li>\n";
+            }
+        }
+
+        $html .= "</ul>\n";
+
+        return $html;
+    }
+}
+
+// --------------------------------------------------------------------------
+// Backward Compatibility Aliases
+// --------------------------------------------------------------------------
+if (! function_exists('render_sidebar_menu')) {
+    function render_sidebar_menu(?array $menuItems = null): string
+    {
+        return sidebarMenu($menuItems);
+    }
+}
+
 if (! function_exists('nav_item')) {
     function nav_item(?string $permission = null, $urlOrOptions = '#', array $options = []): string
     {
@@ -562,5 +816,33 @@ if (! function_exists('render_page_header')) {
         $actions = null
     ): string {
         return pageHeader($title, $subtitle, $icon, $breadcrumbs, $actions);
+    }
+}
+
+if (! function_exists('navbar_resolve_module')) {
+    function navbar_resolve_module(string $permission): string
+    {
+        return nav_resolve_module($permission);
+    }
+}
+
+if (! function_exists('navbar_default_icon')) {
+    function navbar_default_icon(string $permission): string
+    {
+        return nav_default_icon($permission);
+    }
+}
+
+if (! function_exists('navbar_resolve_module_file')) {
+    function navbar_resolve_module_file(string $permission): string
+    {
+        return nav_resolve_module_file($permission);
+    }
+}
+
+if (! function_exists('navbar_resolve_label')) {
+    function navbar_resolve_label(string $permission, ?string $customLabel = null): string
+    {
+        return nav_resolve_label($permission, $customLabel);
     }
 }
