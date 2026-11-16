@@ -102,9 +102,48 @@ if (! function_exists('navbar_default_icon')) {
     }
 }
 
+if (! function_exists('navbar_resolve_module_file')) {
+    /**
+     * ค้นหาชื่อไฟล์ภาษาตาม Module Key หรือ Permission
+     * เช่น sales -> Sales, items -> Items, sale.create.branch -> Sales
+     *
+     * @internal
+     */
+    function navbar_resolve_module_file(string $permission): string
+    {
+        $clean  = strtolower(trim($permission));
+        $prefix = str_contains($clean, '.') ? explode('.', $clean)[0] : $clean;
+
+        $map = [
+            'dashboard'  => 'Dashboard',
+            'pos'        => 'Sales',
+            'sale'       => 'Sales',
+            'sales'      => 'Sales',
+            'item'       => 'Items',
+            'items'      => 'Items',
+            'product'    => 'Items',
+            'products'   => 'Items',
+            'category'   => 'Items',
+            'categories' => 'Items',
+            'inventory'  => 'Items',
+            'user'       => 'Users',
+            'users'      => 'Users',
+            'report'     => 'Reports',
+            'reports'    => 'Reports',
+            'setting'    => 'Settings',
+            'settings'   => 'Settings',
+            'admin'      => 'Settings',
+            'branch'     => 'Settings',
+            'branches'   => 'Settings',
+        ];
+
+        return $map[$prefix] ?? ucfirst($prefix);
+    }
+}
+
 if (! function_exists('navbar_resolve_label')) {
     /**
-     * ดึงข้อความ Label อัตโนมัติจากระบบภาษา lang() ตาม permission หรือ module key
+     * ดึงข้อความ Label อัตโนมัติจากไฟล์ระบบภาษาแยกตามโมดูล (Dashboard, Users, Items, Sales, Reports, Settings)
      *
      * @internal
      */
@@ -114,37 +153,42 @@ if (! function_exists('navbar_resolve_label')) {
             return $customLabel;
         }
 
-        $key = trim($permission);
+        $key  = trim($permission);
+        $file = navbar_resolve_module_file($key);
 
-        // ดึงจากระบบภาษาปัจจุบัน
-        $text = lang("Permissions.{$key}");
+        // รายการคีย์ที่ต้องการลองค้นหาในไฟล์ภาษาประจำโมดูล
+        $candidateKeys = [
+            $key,                    // เช่น 'sale.create.branch' หรือ 'sales'
+            'module_name',           // ชื่อโมดูลหลัก
+            'title',                 // ชื่อหัวข้อโมดูล
+            strtolower($key),        // lowercase
+        ];
 
-        // ถ้าหาไม่เจอใน locale ปัจจุบัน ให้ลอง fallback เป็นภาษาไทย หรืออังกฤษ
-        if ($text === "Permissions.{$key}") {
-            $text = lang("Permissions.{$key}", [], 'th');
-        }
-        if ($text === "Permissions.{$key}") {
-            $text = lang("Permissions.{$key}", [], 'en');
-        }
-
-        // ถ้าพบคำแปล
-        if ($text !== "Permissions.{$key}") {
-            return $text;
-        }
-
-        // กรณีเป็นโมดูลเดี่ยว เช่น sale ลองหา sales หรือกลับกัน
-        if (! str_contains($key, '.')) {
-            $altKey = str_ends_with($key, 's') ? rtrim($key, 's') : ($key . 's');
-            $altText = lang("Permissions.{$altKey}");
-            if ($altText === "Permissions.{$altKey}") {
-                $altText = lang("Permissions.{$altKey}", [], 'th');
+        // ถ้าเป็น granular key เช่น sale.create.branch ให้ลองตัดคำ action เช่น 'create'
+        if (str_contains($key, '.')) {
+            $parts = explode('.', $key);
+            if (isset($parts[1])) {
+                $candidateKeys[] = $parts[1]; // เช่น 'create', 'view'
             }
-            if ($altText === "Permissions.{$altKey}") {
-                $altText = lang("Permissions.{$altKey}", [], 'en');
+        }
+
+        // ค้นหาในไฟล์ประจำโมดูล
+        foreach ($candidateKeys as $cKey) {
+            $text = lang("{$file}.{$cKey}");
+            if ($text !== "{$file}.{$cKey}") {
+                return $text;
             }
 
-            if ($altText !== "Permissions.{$altKey}") {
-                return $altText;
+            // ลอง fallback ภาษาไทย
+            $textTh = lang("{$file}.{$cKey}", [], 'th');
+            if ($textTh !== "{$file}.{$cKey}") {
+                return $textTh;
+            }
+
+            // ลอง fallback ภาษาอังกฤษ
+            $textEn = lang("{$file}.{$cKey}", [], 'en');
+            if ($textEn !== "{$file}.{$cKey}") {
+                return $textEn;
             }
         }
 

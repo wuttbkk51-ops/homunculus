@@ -71,20 +71,39 @@ final class NavbarHelperTest extends CIUnitTestCase
     }
 
     /**
-     * ทดสอบ navbar_resolve_label() ทั้งแบบดึงอัตโนมัติจาก lang() และแบบ override
+     * ทดสอบ navbar_resolve_module_file() สำหรับแมป key ไปยังไฟล์ภาษาประจำโมดูล
+     */
+    public function testModuleFileResolution(): void
+    {
+        $this->assertSame('Sales', navbar_resolve_module_file('sales'));
+        $this->assertSame('Sales', navbar_resolve_module_file('sale'));
+        $this->assertSame('Sales', navbar_resolve_module_file('sale.create.branch'));
+        $this->assertSame('Items', navbar_resolve_module_file('items'));
+        $this->assertSame('Items', navbar_resolve_module_file('product.create.all'));
+        $this->assertSame('Users', navbar_resolve_module_file('users'));
+        $this->assertSame('Dashboard', navbar_resolve_module_file('dashboard'));
+        $this->assertSame('Reports', navbar_resolve_module_file('reports'));
+        $this->assertSame('Settings', navbar_resolve_module_file('settings'));
+    }
+
+    /**
+     * ทดสอบ navbar_resolve_label() จากไฟล์ภาษาแยกตามโมดูล (Dashboard, Users, Items, Sales, Reports, Settings)
      */
     public function testLabelResolution(): void
     {
         service('language')->setLocale('th');
 
-        // ตรวจสอบระดับโมดูล
-        $saleLabel = navbar_resolve_label('sales');
-        $this->assertNotEmpty($saleLabel);
-        $this->assertSame('การขาย & POS', $saleLabel);
+        // ตรวจสอบครบทั้ง 6 โมดูลหลัก
+        $this->assertSame('การขาย & POS', navbar_resolve_label('sales'));
+        $this->assertSame('สินค้า & สต็อก', navbar_resolve_label('items'));
+        $this->assertSame('ผู้ใช้งาน & พนักงาน', navbar_resolve_label('users'));
+        $this->assertSame('แดชบอร์ด', navbar_resolve_label('dashboard'));
+        $this->assertSame('รายงาน & สถิติ', navbar_resolve_label('reports'));
+        $this->assertSame('ตั้งค่าระบบ', navbar_resolve_label('settings'));
 
         // ตรวจสอบระดับ Granular
-        $createSaleLabel = navbar_resolve_label('sale.create.branch');
-        $this->assertSame('เปิดบิลขายหน้าร้าน', $createSaleLabel);
+        $this->assertSame('เปิดบิลขายหน้าร้าน', navbar_resolve_label('sale.create.branch'));
+        $this->assertSame('เพิ่มรายการสินค้าใหม่', navbar_resolve_label('product.create.all'));
 
         // ตรวจสอบ Override
         $this->assertSame('เปิดบิลด่วน', navbar_resolve_label('sale.create.branch', 'เปิดบิลด่วน'));
