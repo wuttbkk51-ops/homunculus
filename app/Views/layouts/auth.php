@@ -13,26 +13,17 @@
         })();
     </script>
 
-    <!-- CDN Preconnect & DNS-Prefetch -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Local Assets (Bootstrap Icons, AdminLTE 4 CSS & Colors) -->
+    <link rel="stylesheet" href="<?= base_url('assets/bootstrap-icons/bootstrap-icons.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/adminlte/css/adminlte.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/adminlte/css/adminlte-colors.min.css') ?>">
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    <!-- AdminLTE 4 CSS & Colors (Built on Bootstrap 5) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte-colors.min.css">
-
-    <!-- Google Font (Non-blocking) -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"></noscript>
+    <!-- Google Fonts: Noto Sans Thai (Local Offline Assets) -->
+    <link rel="stylesheet" href="<?= base_url('assets/css/noto-sans-thai.css') ?>">
 
     <style>
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Sarabun', 'Noto Sans Thai', sans-serif;
+            font-family: 'Noto Sans Thai', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         }
     </style>
 
@@ -42,9 +33,9 @@
 
     <?= $this->renderSection('main') ?>
 
-    <!-- Core Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/js/adminlte.min.js"></script>
+    <!-- Local Core Scripts -->
+    <script src="<?= base_url('assets/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
+    <script src="<?= base_url('assets/adminlte/js/adminlte.min.js') ?>"></script>
 
     <?= $this->renderSection('scripts') ?>
 </body>

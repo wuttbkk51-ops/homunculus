@@ -11,8 +11,11 @@
     },
     "require": {
         "php": "^8.2",
+        "almasaeed2010/adminlte": "4.10",
         "codeigniter4/framework": "^4.7",
-        "codeigniter4/shield": "^1.4"
+        "codeigniter4/shield": "^1.4",
+        "slowprog/composer-copy-file": "*",
+        "twbs/bootstrap": "5.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9",
@@ -39,6 +42,23 @@
         "sort-packages": true
     },
     "scripts": {
+        "post-install-cmd": [
+            "SlowProg\\CopyFile\\ScriptHandler::copy"
+        ],
+        "post-update-cmd": [
+            "SlowProg\\CopyFile\\ScriptHandler::copy"
+        ],
+        "copy-assets": [
+            "SlowProg\\CopyFile\\ScriptHandler::copy"
+        ],
         "test": "phpunit"
+    },
+    "extra": {
+        "copy-file": {
+            "vendor/almasaeed2010/adminlte/dist/css/": "public/assets/adminlte/css/",
+            "vendor/almasaeed2010/adminlte/dist/js/": "public/assets/adminlte/js/",
+            "vendor/twbs/bootstrap/dist/css/": "public/assets/bootstrap/css/",
+            "vendor/twbs/bootstrap/dist/js/": "public/assets/bootstrap/js/"
+        }
     }
 }

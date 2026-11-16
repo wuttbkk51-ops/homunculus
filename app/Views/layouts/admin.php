@@ -13,30 +13,21 @@
         })();
     </script>
 
-    <!-- CDN Preconnect & DNS-Prefetch เพื่อความเร็วสูงสุด -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Local Assets (Bootstrap Icons & OverlayScrollbars) -->
+    <link rel="stylesheet" href="<?= base_url('assets/bootstrap-icons/bootstrap-icons.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/overlayscrollbars/overlayscrollbars.min.css') ?>">
 
-    <!-- Bootstrap Icons (AdminLTE 4 Default) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- AdminLTE 4 Local CSS (Copied via composer-copy-file) -->
+    <link rel="stylesheet" href="<?= base_url('assets/adminlte/css/adminlte.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/adminlte/css/adminlte-colors.min.css') ?>">
 
-    <!-- OverlayScrollbars -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/styles/overlayscrollbars.min.css">
-
-    <!-- AdminLTE 4 CSS & Colors (Built on Bootstrap 5) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte-colors.min.css">
-
-    <!-- Google Font (โหลดแบบ Non-blocking ไม่หน่วงการ Render) -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"></noscript>
+    <!-- Google Fonts: Noto Sans Thai (Local Offline Assets) -->
+    <link rel="stylesheet" href="<?= base_url('assets/css/noto-sans-thai.css') ?>">
 
     <style>
-        /* ใช้ Native System UI Font ทันที (0ms) ระหว่างรอเว็บฟอนต์ */
+        /* ใช้ฟอนต์ Noto Sans Thai แบบ Local ทันที */
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Sarabun', 'Noto Sans Thai', sans-serif;
+            font-family: 'Noto Sans Thai', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         }
 
         /* โทน Semi-Dark Navy เสริมสำหรับ AdminLTE */
@@ -87,11 +78,10 @@
         <?= $this->include('layouts/partials/admin_footer') ?>
     </div>
 
-    <!-- Core Scripts (AdminLTE 4 & Bootstrap 5 Native) -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es6.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/js/adminlte.min.js"></script>
+    <!-- Core Scripts (Local Assets via composer-copy-file) -->
+    <script src="<?= base_url('assets/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
+    <script src="<?= base_url('assets/overlayscrollbars/overlayscrollbars.browser.es6.min.js') ?>"></script>
+    <script src="<?= base_url('assets/adminlte/js/adminlte.min.js') ?>"></script>
 
     <?= $this->renderSection('scripts') ?>
 </body>
