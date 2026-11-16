@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/public') ?>
+<?= $this->extend('public/layout') ?>
 
 <?= $this->section('title') ?>หน้าแรก - Homunculus Enterprise Platform<?= $this->endSection() ?>
 

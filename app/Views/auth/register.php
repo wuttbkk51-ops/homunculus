@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/auth') ?>
+<?= $this->extend('auth/layout') ?>
 
 <?= $this->section('title') ?>สมัครสมาชิก - Homunculus<?= $this->endSection() ?>
 
