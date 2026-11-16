@@ -76,7 +76,7 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Main Content Slot -->
     <main class="flex-grow-1">
         <?= $this->renderSection('content') ?>
     </main>

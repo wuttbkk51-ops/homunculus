@@ -1,6 +1,18 @@
-<?= $this->extend('layouts/admin') ?>
+<?= $this->extend('layouts/master') ?>
 
 <?= $this->section('title') ?>แดชบอร์ด - Homunculus Admin<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<!-- Page-Specific Styles (สามารถใส่ Custom CSS เฉพาะหน้านี้ได้) -->
+<style>
+    .dashboard-stat-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .dashboard-stat-card:hover {
+        transform: translateY(-2px);
+    }
+</style>
+<?= $this->endSection() ?>
 
 <?= $this->section('pageHeader') ?>
 <div class="d-flex align-items-center gap-2">
@@ -251,4 +263,11 @@
         </div>
     </div>
 </div>
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<!-- Page-Specific JavaScript (สามารถใส่ Custom JS เฉพาะหน้านี้ได้) -->
+<script>
+    console.log('Homunculus Dashboard Initialized.');
+</script>
 <?= $this->endSection() ?>

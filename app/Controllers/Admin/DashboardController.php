@@ -14,7 +14,7 @@ class DashboardController extends BaseController
         $user         = auth()->user();
         $activeBranch = active_branch();
 
-        return view('admin/dashboard', [
+        return view('dashboard', [
             'user'         => $user,
             'activeBranch' => $activeBranch,
         ]);
