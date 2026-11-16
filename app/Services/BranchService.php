@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\BranchModel;
 use App\Models\UserBranchModel;
 
 /**
@@ -51,32 +50,52 @@ class BranchService
 
     /**
      * กำหนดสาขาที่กำลังทำงานอยู่ (Active Branch) ลงใน Session
+     * ดึงข้อมูลสาขาและบทบาทในคราวเดียวเพื่อลด DB Query
      */
     public function setActiveBranch(int $userId, int $branchId): bool
     {
-        if (! $this->hasBranchAccess($userId, $branchId)) {
-            return false;
+        $branches = $this->getUserBranches($userId);
+        $selected = null;
+
+        foreach ($branches as $branch) {
+            if ((int) $branch['branch_id'] === $branchId) {
+                $selected = $branch;
+                break;
+            }
         }
 
-        /** @var BranchModel $branchModel */
-        $branchModel = model(BranchModel::class);
-        $branch = $branchModel->find($branchId);
-
-        if (! $branch) {
+        if (! $selected) {
             return false;
         }
-
-        $branchRole = $this->getUserBranchRole($userId, $branchId);
 
         session()->set('active_branch', [
-            'id'          => (int) $branch->id,
-            'name'        => $branch->name,
-            'code'        => $branch->code,
-            'tenant_id'   => (int) $branch->tenant_id,
-            'branch_role' => $branchRole,
+            'id'          => (int) $selected['branch_id'],
+            'name'        => $selected['branch_name'],
+            'code'        => $selected['branch_code'],
+            'tenant_id'   => (int) $selected['tenant_id'],
+            'branch_role' => $selected['branch_role'] ?? 'staff',
         ]);
 
         return true;
+    }
+
+    /**
+     * ตั้งค่าสาขาเริ่มต้น (สาขาแรก) ให้อัตโนมัติหากยังไม่ได้เลือก
+     *
+     * @return array<string, mixed>|null
+     */
+    public function autoSelectDefaultBranch(int $userId): ?array
+    {
+        $branches = $this->getUserBranches($userId);
+
+        if (empty($branches)) {
+            return null;
+        }
+
+        $defaultBranch = $branches[0];
+        $this->setActiveBranch($userId, (int) $defaultBranch['branch_id']);
+
+        return $this->getActiveBranch();
     }
 
     /**

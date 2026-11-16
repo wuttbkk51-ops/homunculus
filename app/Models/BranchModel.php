@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use App\Entities\Branch;
-use CodeIgniter\Model;
 
 /**
- * Model สำหรับจัดการข้อมูลตาราง branches
+ * Model สำหรับจัดการข้อมูลตาราง branches (สืบทอด BaseTenantModel เพื่อ Auto Tenant Scoping)
  */
-class BranchModel extends Model
+class BranchModel extends BaseTenantModel
 {
     protected $table          = 'branches';
     protected $primaryKey     = 'id';
@@ -37,12 +36,4 @@ class BranchModel extends Model
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
-
-    /**
-     * Scope สำหรับกรองข้อมูลเฉพาะ Tenant ที่ระบุ
-     */
-    public function forTenant(int $tenantId): self
-    {
-        return $this->where('tenant_id', $tenantId);
-    }
 }

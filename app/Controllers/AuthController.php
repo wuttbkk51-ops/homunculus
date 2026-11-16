@@ -18,86 +18,25 @@ class AuthController extends BaseController
     }
 
     /**
-     * แสดงหน้าเลือกสาขา (กรณีผู้ใช้มีหลายสาขา)
-     */
-    public function selectBranchView()
-    {
-        if (! auth()->loggedIn()) {
-            return redirect()->to('login');
-        }
-
-        $user = auth()->user();
-        if ($user->isSuperAdmin()) {
-            return redirect()->to('admin');
-        }
-
-        $branches = $this->branchService->getUserBranches((int) $user->id);
-
-        if (empty($branches)) {
-            auth()->logout();
-
-            return redirect()->to('login')->with('error', 'คุณยังไม่ได้รับมอบหมายสาขาในการทำงาน');
-        }
-
-        // หากมีเพียงสาขาเดียว กำหนดให้อัตโนมัติและส่งไปหน้า admin
-        if (count($branches) === 1) {
-            $this->branchService->setActiveBranch((int) $user->id, (int) $branches[0]['branch_id']);
-
-            return redirect()->to('admin');
-        }
-
-        return view('auth/select_branch', [
-            'branches'     => $branches,
-            'activeBranch' => $this->branchService->getActiveBranch(),
-        ]);
-    }
-
-    /**
-     * บันทึกสาขาที่เลือกเข้า Session
-     */
-    public function selectBranchSubmit()
-    {
-        if (! auth()->loggedIn()) {
-            return redirect()->to('login');
-        }
-
-        $rules = [
-            'branch_id' => 'required|is_natural_no_zero',
-        ];
-
-        if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        $user     = auth()->user();
-        $branchId = (int) $this->request->getPost('branch_id');
-
-        $success = $this->branchService->setActiveBranch((int) $user->id, $branchId);
-
-        if (! $success) {
-            return redirect()->back()->with('error', 'ไม่สามารถเลือกสาขานี้ได้ หรือคุณไม่มีสิทธิ์เข้าถึง');
-        }
-
-        return redirect()->to('admin');
-    }
-
-    /**
-     * สลับสาขาที่กำลังทำงานอยู่ (Switch Branch)
+     * สลับสาขาที่กำลังทำงานอยู่ (Switch Branch ผ่าน Navbar Dropdown หรือ API)
      */
     public function switchBranch(int $branchId)
     {
-        if (! auth()->loggedIn()) {
-            return redirect()->to('login');
-        }
-
         $user    = auth()->user();
         $success = $this->branchService->setActiveBranch((int) $user->id, $branchId);
+
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => $success,
+                'message' => $success ? 'สลับสาขาเรียบร้อยแล้ว' : 'คุณไม่มีสิทธิ์เข้าถึงสาขาดังกล่าว',
+            ]);
+        }
 
         if (! $success) {
             return redirect()->back()->with('error', 'คุณไม่มีสิทธิ์สลับไปยังสาขาดังกล่าว');
         }
 
-        return redirect()->to('admin')->with('message', 'สลับสาขาเรียบร้อยแล้ว');
+        return redirect()->back()->with('message', 'สลับสาขาเรียบร้อยแล้ว');
     }
 
     /**

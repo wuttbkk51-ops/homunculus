@@ -11,6 +11,8 @@ use CodeIgniter\Shield\Models\UserModel as ShieldUserModel;
  */
 class UserModel extends ShieldUserModel
 {
+    protected $returnType = User::class;
+
     protected function initialize(): void
     {
         parent::initialize();

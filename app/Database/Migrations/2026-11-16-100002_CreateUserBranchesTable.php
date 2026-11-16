@@ -18,6 +18,11 @@ class CreateUserBranchesTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
+            'tenant_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+            ],
             'user_id' => [
                 'type'       => 'INT',
                 'constraint' => 11,
@@ -44,8 +49,10 @@ class CreateUserBranchesTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
+        $this->forge->addKey(['tenant_id', 'user_id']);
         $this->forge->addUniqueKey(['user_id', 'branch_id']);
         $this->forge->addKey('branch_id');
+        $this->forge->addForeignKey('tenant_id', 'tenants', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('user_id', 'users', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('branch_id', 'branches', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('user_branches', true);

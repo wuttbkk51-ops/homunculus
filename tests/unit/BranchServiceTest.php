@@ -57,6 +57,7 @@ final class BranchServiceTest extends CIUnitTestCase
 
         // มอบหมายสาขา 1 เป็น manager
         $userBranchModel->insert([
+            'tenant_id'   => $tenantId,
             'user_id'     => $userId,
             'branch_id'   => $branch1Id,
             'branch_role' => 'manager',

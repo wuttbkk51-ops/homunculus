@@ -21,6 +21,8 @@
         .badge-denied { background: #fee2e2; color: #b91c1c; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 0.25rem; display: inline-block; }
         .btn-link { color: #2563eb; text-decoration: none; font-size: 0.875rem; font-weight: 500; }
         .btn-link:hover { text-decoration: underline; }
+        .branch-select { font-size: 0.8125rem; font-weight: 600; padding: 0.35rem 0.75rem; border-radius: 0.375rem; border: 1px solid #cbd5e1; background-color: #ffffff; color: #1e293b; cursor: pointer; outline: none; transition: border-color 0.2s; }
+        .branch-select:hover, .branch-select:focus { border-color: #2563eb; }
         .btn-logout { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 0.875rem; font-weight: 600; }
         .btn-logout:hover { text-decoration: underline; }
     </style>
@@ -29,11 +31,18 @@
     <header>
         <div class="logo">Homunculus Admin</div>
         <div class="user-nav">
-            <?php if (! empty($activeBranch)): ?>
-                <span class="active-branch-pill">
-                    สาขา: <?= esc($activeBranch['name']) ?> (<?= esc($activeBranch['branch_role']) ?>)
-                </span>
-                <a href="<?= site_url('auth/select-branch') ?>" class="btn-link">สลับสาขา</a>
+            <?php $myBranches = user_branches(); ?>
+            <?php if (! empty($myBranches)): ?>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label for="branchSwitcher" style="font-size: 0.8125rem; color: #64748b; font-weight: 500;">สาขา:</label>
+                    <select id="branchSwitcher" class="branch-select" onchange="location.href='<?= site_url('switch-branch') ?>/' + this.value">
+                        <?php foreach ($myBranches as $b): ?>
+                            <option value="<?= esc($b['branch_id']) ?>" <?= (int) $b['branch_id'] === (int) active_branch_id() ? 'selected' : '' ?>>
+                                <?= esc($b['branch_name']) ?> (<?= esc($b['branch_role']) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             <?php elseif (is_superadmin()): ?>
                 <span class="active-branch-pill" style="background:#fef3c7; color:#92400e; border-color:#fde68a;">
                     SuperAdmin (ทุกสาขา)

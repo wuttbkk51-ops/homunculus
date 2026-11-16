@@ -27,6 +27,8 @@
 - **Controller (C)**: Thin entrypoint (Request -> Validate -> Call Service/Model -> Return). **Zero business logic**.
 - **Service (S)**: Business logic layer (`app/Services/`). Manages multi-model workflows, transactions, calculations, and 3rd-party APIs.
 - **Model (M)**: Data access layer. Handles single-table CRUD, query scopes, `$allowedFields`, and strict validation rules.
+  - **Mandatory BaseTenantModel**: ทุก Model ที่เป็นข้อมูลของ Tenant (เช่น Products, Sales, Customers, Branches, Orders) **ต้องสืบทอดจาก `App\Models\BaseTenantModel` เสมอ**
+  - ❌ **ห้ามสืบทอดจาก `CodeIgniter\Model` ตรงๆ สำหรับตารางของ Tenant** เพื่อป้องกันปัญหา Data Leak ข้ามองค์กร
 - **View (V)**: Presentation only. Renders HTML with `esc()` (XSS prevention) or formats JSON output. Zero DB queries.
 - **Security**: Include `<?= csrf_field() ?>` on all POST forms. Read secrets from `env()`.
 
@@ -42,9 +44,10 @@
   - Resolve tenant context and active status via `TenantService` using CI4 Cache (`cache()->remember()`).
   - **Dual Cache Driver**: File cache on Local (`writable/cache/`); switch to Redis on Production via `.env` with zero code change.
   - **Instant Invalidation**: Call `TenantService::clearCache($tenantId)` immediately when tenant status changes (e.g. suspended, renewed).
-- **Tenant Isolation Security**:
-  - Always scope queries with `WHERE tenant_id = :tenantId`.
-  - Auto-inject `tenant_id` on model insert (via callbacks). **Never trust `tenant_id` from user input / POST forms**.
+- **Tenant Isolation Security (Enforced via `BaseTenantModel`)**:
+  - **Auto Scoping**: `BaseTenantModel` จะผูก `WHERE tenant_id = :tenantId` ให้ทุกคำสั่ง `find()`, `findAll()`, `first()`, `update()`, `delete()` อัตโนมัติ ป้องกัน IDOR และ Data Leak
+  - **Auto Injection**: `BaseTenantModel` จะดึง `tenant_id()` จาก Session ไปใส่ในข้อมูล `insert()` หรือ `save()` อัตโนมัติ **ห้ามเชื่อถือ `tenant_id` จาก user input / POST forms**
+  - **Bypass for SuperAdmin/CLI**: ใช้ `$model->withoutTenant()` เมื่อต้องการ query ข้อมูลข้าม Tenant อย่างเจาะจง (เช่น SuperAdmin หรือ Background Worker)
 
 ## 5. Authorization: Contextual RBAC & Permission-First
 - **Permission-First**: Code and UI must check **granular permissions only**. **Never check role names directly in logic**.

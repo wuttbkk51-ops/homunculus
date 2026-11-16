@@ -108,15 +108,5 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [
-        'session' => [
-            'before' => ['admin', 'admin/*'],
-        ],
-        'tenant_active' => [
-            'before' => ['admin', 'admin/*'],
-        ],
-        'active_branch' => [
-            'before' => ['admin', 'admin/*'],
-        ],
-    ];
+    public array $filters = [];
 }

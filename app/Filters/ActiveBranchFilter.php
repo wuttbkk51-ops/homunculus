@@ -2,7 +2,6 @@
 
 namespace App\Filters;
 
-use App\Services\BranchService;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -25,19 +24,18 @@ class ActiveBranchFilter implements FilterInterface
             return null;
         }
 
-        /** @var BranchService $branchService */
-        $branchService = service('branch_service');
-        $activeBranchId = $branchService->getActiveBranchId();
+        $activeBranch = session()->get('active_branch');
 
-        if ($activeBranchId === null) {
-            return redirect()->to('auth/select-branch');
-        }
+        if (empty($activeBranch['id'])) {
+            /** @var \App\Services\BranchService $branchService */
+            $branchService = service('branch_service');
+            $activeBranch  = $branchService->autoSelectDefaultBranch((int) $user->id);
 
-        // ตรวจสอบว่าผู้ใช้ยังมีสิทธิ์ในสาขานี้จริงๆ
-        if (! $branchService->hasBranchAccess((int) $user->id, $activeBranchId)) {
-            $branchService->clearActiveBranch();
+            if ($activeBranch === null) {
+                auth()->logout();
 
-            return redirect()->to('auth/select-branch')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงสาขาดังกล่าว');
+                return redirect()->to('login')->with('error', 'คุณยังไม่ได้รับมอบหมายสาขาในการทำงาน');
+            }
         }
 
         return null;

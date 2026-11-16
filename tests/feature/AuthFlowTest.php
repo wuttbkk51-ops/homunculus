@@ -25,14 +25,17 @@ final class AuthFlowTest extends CIUnitTestCase
 
     public function testAdminRouteIsGuardedWhenUnauthenticated(): void
     {
-        // เมื่อไม่ได้ล็อกอินเข้าใช้งาน /admin ต้องถูก redirect ไปที่ /login
+        // เมื่อไม่ได้ล็อกอินเข้าใช้งาน /admin หรือ /dashboard ต้องถูก redirect ไปที่ /login
         $result = $this->get('admin');
         $result->assertRedirectTo('login');
+
+        $resultDashboard = $this->get('dashboard');
+        $resultDashboard->assertRedirectTo('login');
     }
 
-    public function testSelectBranchViewRedirectsWhenNotLoggedIn(): void
+    public function testSwitchBranchRouteIsGuardedWhenUnauthenticated(): void
     {
-        $result = $this->get('auth/select-branch');
+        $result = $this->get('switch-branch/1');
         $result->assertRedirectTo('login');
     }
 

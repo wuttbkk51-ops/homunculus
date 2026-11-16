@@ -286,7 +286,7 @@ class Auth extends ShieldAuth
      */
     public array $validFields = [
         'email',
-        // 'username',
+        'username',
     ];
 
     /**
@@ -445,6 +445,10 @@ class Auth extends ShieldAuth
         /** @var \App\Services\AuthService $authService */
         $authService = service('auth_service');
         $result      = $authService->handlePostLogin();
+
+        if (! empty($result['message'])) {
+            session()->setFlashdata('error', $result['message']);
+        }
 
         return $this->getUrl($result['redirect']);
     }

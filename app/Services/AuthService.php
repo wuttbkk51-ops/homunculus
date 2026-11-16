@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Entities\User;
+use CodeIgniter\Shield\Entities\User as ShieldUser;
 use Config\AuthGroups;
 
 /**
@@ -27,9 +28,10 @@ class AuthService
     /**
      * ประมวลผลหลังการล็อกอินสำเร็จ เพื่อจัดเตรียม Tenant และ Branch Context
      *
+     * @param User|ShieldUser|null $user
      * @return array{status: string, redirect: string, message?: string}
      */
-    public function handlePostLogin(?User $user = null): array
+    public function handlePostLogin($user = null): array
     {
         $user ??= auth()->user();
 
@@ -41,14 +43,18 @@ class AuthService
         }
 
         // 1. กรณี SuperAdmin
-        if ($user->isSuperAdmin()) {
+        $isSuperAdmin = method_exists($user, 'isSuperAdmin')
+            ? $user->isSuperAdmin()
+            : ((int) $user->id === 1 || ($user->tenant_id === null && method_exists($user, 'inGroup') && $user->inGroup('admin')));
+
+        if ($isSuperAdmin) {
             return [
                 'status'   => 'success',
-                'redirect' => 'admin',
+                'redirect' => 'dashboard',
             ];
         }
 
-        $tenantId = $user->getTenantId();
+        $tenantId = method_exists($user, 'getTenantId') ? $user->getTenantId() : ($user->tenant_id ?? null);
         if ($tenantId === null) {
             auth()->logout();
 
@@ -70,10 +76,10 @@ class AuthService
             ];
         }
 
-        // 3. ตรวจสอบสาขาที่ได้รับมอบหมาย
-        $branches = $this->branchService->getUserBranches((int) $user->id);
+        // 3. กำหนดสาขาเริ่มต้นให้อัตโนมัติ (Seamless UX - ไม่ต้องมีหน้าเลือกสาขาคั่น)
+        $defaultBranch = $this->branchService->autoSelectDefaultBranch((int) $user->id);
 
-        if (empty($branches)) {
+        if ($defaultBranch === null) {
             auth()->logout();
 
             return [
@@ -83,28 +89,19 @@ class AuthService
             ];
         }
 
-        // ถ้ามีสาขาเดียว ตั้งค่า Active Branch อัตโนมัติ
-        if (count($branches) === 1) {
-            $this->branchService->setActiveBranch((int) $user->id, (int) $branches[0]['branch_id']);
-
-            return [
-                'status'   => 'success',
-                'redirect' => 'admin',
-            ];
-        }
-
-        // ถ้ามีหลายสาขา ให้ไปที่หน้าเลือกสาขา
         return [
-            'status'   => 'select_branch',
-            'redirect' => 'auth/select-branch',
+            'status'   => 'success',
+            'redirect' => 'dashboard',
         ];
     }
 
     /**
      * ตรวจสอบสิทธิ์แบบ Permission-First ตามหลัก Contextual RBAC
      * รูปแบบคีย์สิทธิ์: {module}.{action}.{scope} เช่น sale.view.own, sale.create.branch, sale.view.all
+     *
+     * @param User|ShieldUser|null $user
      */
-    public function can(string $requestedPermission, ?User $user = null, ?int $branchId = null): bool
+    public function can(string $requestedPermission, $user = null, ?int $branchId = null): bool
     {
         $user ??= auth()->user();
 
@@ -113,11 +110,15 @@ class AuthService
         }
 
         // SuperAdmin ได้รับสิทธิ์ทั้งหมด
-        if ($user->isSuperAdmin()) {
+        $isSuperAdmin = method_exists($user, 'isSuperAdmin')
+            ? $user->isSuperAdmin()
+            : ((int) $user->id === 1 || ($user->tenant_id === null && method_exists($user, 'inGroup') && $user->inGroup('admin')));
+
+        if ($isSuperAdmin) {
             return true;
         }
 
-        $tenantId = $user->getTenantId();
+        $tenantId = method_exists($user, 'getTenantId') ? $user->getTenantId() : ($user->tenant_id ?? null);
         if ($tenantId === null || ! $this->tenantService->isTenantActive($tenantId)) {
             return false;
         }
@@ -137,46 +138,64 @@ class AuthService
 
     /**
      * รวบรวมสิทธิ์ทั้งหมดของผู้ใช้ ทั้งจาก Branch Role ในสาขาที่ Active และ Tenant Groups
+     * ดำเนินการผ่าน CI4 Cache เพื่อให้ Zero DB Query per Request
      *
+     * @param User|ShieldUser $user
      * @return list<string>
      */
-    public function getUserPermissions(User $user, ?int $branchId = null): array
+    public function getUserPermissions($user, ?int $branchId = null): array
     {
         $branchId ??= $this->branchService->getActiveBranchId();
-        $permissions = [];
+        $cacheKey = "user_perms_{$user->id}_" . ($branchId ?? 'global');
 
-        // 1. สิทธิ์จาก Contextual Branch Role
-        if ($branchId !== null) {
-            $branchRole = $this->branchService->getUserBranchRole((int) $user->id, $branchId);
-            if ($branchRole && isset($this->authGroups->matrix[$branchRole])) {
-                $permissions = array_merge($permissions, $this->authGroups->matrix[$branchRole]);
-            }
-        }
+        return cache()->remember($cacheKey, 3600, function () use ($user, $branchId): array {
+            $permissions = [];
 
-        // 2. สิทธิ์จาก Groups ทั่วไปของ Shield
-        if (method_exists($user, 'getGroups')) {
-            try {
-                $groups = $user->getGroups();
-                foreach ($groups as $group) {
-                    if (isset($this->authGroups->matrix[$group])) {
-                        $permissions = array_merge($permissions, $this->authGroups->matrix[$group]);
-                    }
+            // 1. สิทธิ์จาก Contextual Branch Role
+            if ($branchId !== null) {
+                $branchRole = $this->branchService->getUserBranchRole((int) $user->id, $branchId);
+                if ($branchRole && isset($this->authGroups->matrix[$branchRole])) {
+                    $permissions = array_merge($permissions, $this->authGroups->matrix[$branchRole]);
                 }
-            } catch (\Throwable) {
-                // ข้ามหากยังไม่มีตาราง auth_groups_users ในฐานข้อมูล
             }
-        }
 
-        // 3. สิทธิ์ที่กำหนดให้ผู้ใช้โดยตรง (Direct permissions)
-        if (method_exists($user, 'getPermissions')) {
-            try {
-                $permissions = array_merge($permissions, $user->getPermissions());
-            } catch (\Throwable) {
-                // ข้ามหากยังไม่มีตาราง auth_permissions_users ในฐานข้อมูล
+            // 2. สิทธิ์จาก Groups ทั่วไปของ Shield
+            if (method_exists($user, 'getGroups')) {
+                try {
+                    $groups = $user->getGroups();
+                    foreach ($groups as $group) {
+                        if (isset($this->authGroups->matrix[$group])) {
+                            $permissions = array_merge($permissions, $this->authGroups->matrix[$group]);
+                        }
+                    }
+                } catch (\Throwable) {
+                    // ข้ามหากยังไม่มีตาราง auth_groups_users ในฐานข้อมูล
+                }
             }
-        }
 
-        return array_values(array_unique($permissions));
+            // 3. สิทธิ์ที่กำหนดให้ผู้ใช้โดยตรง (Direct permissions)
+            if (method_exists($user, 'getPermissions')) {
+                try {
+                    $permissions = array_merge($permissions, $user->getPermissions());
+                } catch (\Throwable) {
+                    // ข้ามหากยังไม่มีตาราง auth_permissions_users ในฐานข้อมูล
+                }
+            }
+
+            return array_values(array_unique($permissions));
+        });
+    }
+
+    /**
+     * ล้างแคชสิทธิ์ของผู้ใช้ (เรียกใช้เมื่อมีการแก้ไข Role/Permissions หรือสลับสาขา)
+     */
+    public function clearUserPermissionsCache(int $userId, ?int $branchId = null): void
+    {
+        if ($branchId !== null) {
+            cache()->delete("user_perms_{$userId}_{$branchId}");
+        } else {
+            cache()->delete("user_perms_{$userId}_global");
+        }
     }
 
     /**
@@ -203,13 +222,18 @@ class AuthService
         $rScope = $requestedParts[2] ?? '*';
 
         // ตรวจสอบ Module
-        if ($gMod !== '*' && $gMod !== $rMod) {
+        if ($gMod !== '*' && $rMod !== '*' && $gMod !== $rMod) {
             return false;
         }
 
         // ตรวจสอบ Action
-        if ($gAct !== '*' && $gAct !== $rAct) {
+        if ($gAct !== '*' && $rAct !== '*' && $gAct !== $rAct) {
             return false;
+        }
+
+        // หาก Scope ฝั่งใดฝั่งหนึ่งเป็น Wildcard ถือว่าเข้าเงื่อนไข
+        if ($gScope === '*' || $rScope === '*') {
+            return true;
         }
 
         // ตรวจสอบ Scope ตามลำดับชั้น (Hierarchy: all > branch > own)

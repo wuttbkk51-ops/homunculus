@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
-
 /**
  * Model สำหรับจัดการข้อมูลตาราง user_branches (Pivot table)
+ * สืบทอด BaseTenantModel เพื่อรับประกัน Tenant Isolation
  */
-class UserBranchModel extends Model
+class UserBranchModel extends BaseTenantModel
 {
     protected $table          = 'user_branches';
     protected $primaryKey     = 'id';
@@ -16,6 +15,7 @@ class UserBranchModel extends Model
     protected $useSoftDeletes = false;
 
     protected $allowedFields = [
+        'tenant_id',
         'user_id',
         'branch_id',
         'branch_role',
@@ -27,6 +27,7 @@ class UserBranchModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules = [
+        'tenant_id'   => 'required|is_natural_no_zero',
         'user_id'     => 'required|is_natural_no_zero',
         'branch_id'   => 'required|is_natural_no_zero',
         'branch_role' => 'required|max_length[50]',

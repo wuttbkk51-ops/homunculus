@@ -45,6 +45,26 @@ if (! function_exists('active_branch')) {
     }
 }
 
+if (! function_exists('user_branches')) {
+    /**
+     * ดึงรายการสาขาทั้งหมดที่ผู้ใช้ปัจจุบันได้รับมอบหมาย (สำหรับแสดงใน Dropdown บน Navbar)
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    function user_branches(): array
+    {
+        $user = auth()->user();
+        if (! $user) {
+            return [];
+        }
+
+        /** @var BranchService $branchService */
+        $branchService = service('branch_service');
+
+        return $branchService->getUserBranches((int) $user->id);
+    }
+}
+
 if (! function_exists('current_tenant_id')) {
     /**
      * ดึง ID ของ Tenant ประจำตัวผู้ใช้ที่ล็อกอินอยู่
