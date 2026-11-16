@@ -6,7 +6,7 @@
 <div class="login-box">
     <!-- Login Logo -->
     <div class="login-logo mb-4 text-center">
-        <a href="<?= site_url('/') ?>" class="link-dark text-decoration-none fs-2 fw-bold d-inline-flex align-items-center gap-2">
+        <a href="<?= site_url('/') ?>" class="link-body-emphasis text-decoration-none fs-2 fw-bold d-inline-flex align-items-center gap-2">
             <i class="bi bi-cpu-fill text-primary fs-1"></i>
             <span><b>Homunculus</b></span>
         </a>

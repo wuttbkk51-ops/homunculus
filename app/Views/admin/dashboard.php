@@ -30,7 +30,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-secondary small fw-medium">สาขาปัจจุบัน</span>
-                        <h5 class="fw-bold text-dark mb-0 mt-1">
+                        <h5 class="fw-bold text-body-emphasis mb-0 mt-1">
                             <?= esc($activeBranch['name'] ?? 'ทุกสาขา (SuperAdmin)') ?>
                         </h5>
                     </div>
@@ -48,7 +48,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-secondary small fw-medium">บทบาทในสาขานี้</span>
-                        <h5 class="fw-bold text-dark mb-0 mt-1">
+                        <h5 class="fw-bold text-body-emphasis mb-0 mt-1">
                             <?= esc($activeBranch['branch_role'] ?? ($user->isSuperAdmin() ? 'superadmin' : '-')) ?>
                         </h5>
                     </div>
@@ -66,7 +66,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-secondary small fw-medium">Tenant ID</span>
-                        <h5 class="fw-bold text-dark mb-0 mt-1">
+                        <h5 class="fw-bold text-body-emphasis mb-0 mt-1">
                             <?= esc(current_tenant_id() ?? 'NULL (SuperAdmin)') ?>
                         </h5>
                     </div>
@@ -84,7 +84,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-secondary small fw-medium">ผู้ใช้งาน</span>
-                        <h5 class="fw-bold text-dark mb-0 mt-1">
+                        <h5 class="fw-bold text-body-emphasis mb-0 mt-1">
                             <?= esc($user->username ?? '-') ?>
                         </h5>
                     </div>
@@ -103,7 +103,7 @@
     <div class="col-lg-5">
         <div class="card card-outline card-primary shadow-sm border-0 h-100">
             <div class="card-header bg-transparent py-3">
-                <h5 class="card-title fw-bold text-dark mb-0">
+                <h5 class="card-title fw-bold text-body-emphasis mb-0">
                     <i class="bi bi-info-circle me-1 text-primary"></i>บริบทผู้ใช้งาน (Contextual State)
                 </h5>
             </div>
@@ -153,7 +153,7 @@
     <div class="col-lg-7">
         <div class="card card-outline card-success shadow-sm border-0 h-100">
             <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
-                <h5 class="card-title fw-bold text-dark mb-0">
+                <h5 class="card-title fw-bold text-body-emphasis mb-0">
                     <i class="bi bi-shield-check me-1 text-success"></i>ผลการตรวจสอบสิทธิ์แบบบริบท
                 </h5>
                 <span class="badge bg-secondary-subtle text-secondary small">Permission-First</span>
@@ -161,7 +161,7 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <thead class="border-bottom">
                             <tr>
                                 <th class="ps-3">Permission Key</th>
                                 <th>คำอธิบาย</th>

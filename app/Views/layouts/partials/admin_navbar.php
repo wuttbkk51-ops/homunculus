@@ -19,8 +19,36 @@ $activeBranchId = active_branch_id();
             </li>
         </ul>
 
-        <!-- ฝั่งขวา: Branch Switcher & User Dropdown -->
+        <!-- ฝั่งขวา: Theme Switcher, Branch Switcher & User Dropdown -->
         <ul class="navbar-nav ms-auto align-items-center gap-2">
+            <!-- Theme Mode Switcher (AdminLTE 4 Native) -->
+            <li class="nav-item dropdown">
+                <button class="btn btn-link nav-link py-2 px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme">
+                    <i class="bi bi-moon-stars-fill my-1 theme-icon-active"></i>
+                    <span class="d-lg-none ms-2" id="bd-theme-text">สลับธีม</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="bd-theme-text">
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
+                            <i class="bi bi-sun-fill me-2 opacity-50"></i>
+                            โหมดสว่าง (Light)
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="dark" aria-pressed="true">
+                            <i class="bi bi-moon-stars-fill me-2 opacity-50"></i>
+                            โหมดมืด (Dark Navy)
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
+                            <i class="bi bi-circle-half me-2 opacity-50"></i>
+                            ตามระบบ (Auto)
+                        </button>
+                    </li>
+                </ul>
+            </li>
+
             <!-- Branch Switcher -->
             <?php if (! empty($myBranches)): ?>
                 <li class="nav-item d-flex align-items-center">
@@ -55,12 +83,12 @@ $activeBranchId = active_branch_id();
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                     <li class="dropdown-header">
-                        <div class="fw-bold text-dark"><?= esc($user->username ?? '') ?></div>
-                        <small class="text-muted"><?= esc($user->email ?? '') ?></small>
+                        <div class="fw-bold text-body"><?= esc($user->username ?? '') ?></div>
+                        <small class="text-secondary"><?= esc($user->email ?? '') ?></small>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
-                        <span class="dropdown-item-text small text-muted">
+                        <span class="dropdown-item-text small text-secondary">
                             <i class="bi bi-hash me-1"></i>Tenant ID: <?= esc(current_tenant_id() ?? 'SuperAdmin') ?>
                         </span>
                     </li>

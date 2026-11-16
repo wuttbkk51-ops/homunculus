@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $this->renderSection('title') ?: 'ระบบจัดการ - Homunculus' ?></title>
+
+    <!-- กำหนด Default Theme = Dark (Semi-Dark Navy) ป้องกันการกะพริบของหน้าจอ -->
+    <script>
+        (function() {
+            const currentTheme = localStorage.getItem('lte-theme') || 'dark';
+            document.documentElement.setAttribute('data-bs-theme', currentTheme);
+        })();
+    </script>
 
     <!-- Google Fonts & System Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,13 +24,19 @@
     <!-- OverlayScrollbars -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/styles/overlayscrollbars.min.css">
 
-    <!-- AdminLTE 4 CSS (Built on Bootstrap 5) -->
+    <!-- AdminLTE 4 CSS & Colors (Built on Bootstrap 5) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte-colors.min.css">
 
     <style>
         /* กำหนด Font สากลสำหรับภาษาไทยให้ดูสวยงาม เป็นทางการ ไม่กระทบ layout AdminLTE 4 */
         body {
             font-family: 'Sarabun', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* โทน Semi-Dark Navy เสริมสำหรับ AdminLTE */
+        .bg-navy {
+            background-color: #001f3f !important;
         }
     </style>
 
@@ -33,7 +47,7 @@
         <!-- App Header (Navbar) -->
         <?= $this->include('layouts/partials/admin_navbar') ?>
 
-        <!-- App Sidebar -->
+        <!-- App Sidebar (Semi-dark Navy) -->
         <?= $this->include('layouts/partials/admin_sidebar') ?>
 
         <!-- Main Content Area -->

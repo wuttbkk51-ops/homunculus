@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $this->renderSection('title') ?: 'เข้าสู่ระบบ - Homunculus' ?></title>
+
+    <!-- กำหนด Default Theme = Dark (Semi-Dark Navy) -->
+    <script>
+        (function() {
+            const currentTheme = localStorage.getItem('lte-theme') || 'dark';
+            document.documentElement.setAttribute('data-bs-theme', currentTheme);
+        })();
+    </script>
 
     <!-- Google Fonts & Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,8 +21,9 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- AdminLTE 4 CSS (Built on Bootstrap 5) -->
+    <!-- AdminLTE 4 CSS & Colors (Built on Bootstrap 5) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte-colors.min.css">
 
     <style>
         body {
