@@ -6,8 +6,6 @@ declare(strict_types=1);
  * ข้อความภาษาไทยสำหรับโมดูล Sales (การขาย & POS)
  */
 return [
-    'module_name'        => 'การขาย & POS',
-    'title'              => 'การขาย & POS',
     'sales'              => 'การขาย & POS',
     'sale'               => 'การขาย & POS',
     'pos'                => 'จุดขายหน้าร้าน (POS)',

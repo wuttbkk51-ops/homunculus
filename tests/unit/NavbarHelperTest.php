@@ -88,16 +88,21 @@ final class NavbarHelperTest extends CIUnitTestCase
 
     /**
      * ทดสอบ navbar_resolve_label() จากไฟล์ภาษาแยกตามโมดูล (Dashboard, Users, Items, Sales, Reports, Settings)
+     * กติกา: ดึงตรงตามชื่อ key (เช่น dashboard -> 'Dashboard.dashboard') และไม่มี 'module_name' อีกต่อไป
      */
     public function testLabelResolution(): void
     {
         service('language')->setLocale('th');
 
-        // ตรวจสอบครบทั้ง 6 โมดูลหลัก
+        // ตรวจสอบว่าไม่มี 'module_name' ใน Dashboard
+        $this->assertSame('Dashboard.module_name', lang('Dashboard.module_name'));
+        $this->assertSame('แดชบอร์ด', lang('Dashboard.dashboard'));
+
+        // ตรวจสอบครบทั้ง 6 โมดูลหลักผ่าน navbar_resolve_label()
+        $this->assertSame('แดชบอร์ด', navbar_resolve_label('dashboard'));
         $this->assertSame('การขาย & POS', navbar_resolve_label('sales'));
         $this->assertSame('สินค้า & สต็อก', navbar_resolve_label('items'));
         $this->assertSame('ผู้ใช้งาน & พนักงาน', navbar_resolve_label('users'));
-        $this->assertSame('แดชบอร์ด', navbar_resolve_label('dashboard'));
         $this->assertSame('รายงาน & สถิติ', navbar_resolve_label('reports'));
         $this->assertSame('ตั้งค่าระบบ', navbar_resolve_label('settings'));
 

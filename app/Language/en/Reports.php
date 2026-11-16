@@ -6,8 +6,6 @@ declare(strict_types=1);
  * English language strings for Reports module
  */
 return [
-    'module_name'        => 'Reports & Analytics',
-    'title'              => 'Reports & Analytics',
     'reports'            => 'Reports & Analytics',
     'report'             => 'Reports & Analytics',
     'daily'              => 'Daily Sales Report',

@@ -6,8 +6,6 @@ declare(strict_types=1);
  * English language strings for Sales module
  */
 return [
-    'module_name'        => 'Sales & POS',
-    'title'              => 'Sales & POS',
     'sales'              => 'Sales & POS',
     'sale'               => 'Sales & POS',
     'pos'                => 'Point of Sale (POS)',

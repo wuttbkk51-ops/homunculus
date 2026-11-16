@@ -6,8 +6,6 @@ declare(strict_types=1);
  * English language strings for Users module
  */
 return [
-    'module_name'     => 'Users & Staff',
-    'title'           => 'Users & Staff',
     'users'           => 'Users & Staff',
     'user'            => 'Users & Staff',
     'list'            => 'Staff List',

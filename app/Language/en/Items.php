@@ -6,8 +6,6 @@ declare(strict_types=1);
  * English language strings for Items module
  */
 return [
-    'module_name'        => 'Items & Products',
-    'title'              => 'Items & Products',
     'items'              => 'Items & Products',
     'item'               => 'Items & Products',
     'products'           => 'Products & Services',

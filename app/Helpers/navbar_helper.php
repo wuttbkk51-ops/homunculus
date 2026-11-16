@@ -144,6 +144,7 @@ if (! function_exists('navbar_resolve_module_file')) {
 if (! function_exists('navbar_resolve_label')) {
     /**
      * ดึงข้อความ Label อัตโนมัติจากไฟล์ระบบภาษาแยกตามโมดูล (Dashboard, Users, Items, Sales, Reports, Settings)
+     * กติกา: ดึงตรงตามชื่อ key ของ permission หรือ module slug (เช่น navItem('dashboard') ดึง lang('Dashboard.dashboard'))
      *
      * @internal
      */
@@ -156,21 +157,24 @@ if (! function_exists('navbar_resolve_label')) {
         $key  = trim($permission);
         $file = navbar_resolve_module_file($key);
 
-        // รายการคีย์ที่ต้องการลองค้นหาในไฟล์ภาษาประจำโมดูล
+        // รายการคีย์ค้นหา: ดึงตามชื่อ key ที่ส่งมาโดยตรง (ไม่มี 'module_name')
         $candidateKeys = [
-            $key,                    // เช่น 'sale.create.branch' หรือ 'sales'
-            'module_name',           // ชื่อโมดูลหลัก
-            'title',                 // ชื่อหัวข้อโมดูล
-            strtolower($key),        // lowercase
+            $key,
+            strtolower($key),
         ];
 
-        // ถ้าเป็น granular key เช่น sale.create.branch ให้ลองตัดคำ action เช่น 'create'
-        if (str_contains($key, '.')) {
+        // กรณีเป็นคำเดี่ยว เช่น sale ลองหา sales หรือกลับกัน
+        if (! str_contains($key, '.')) {
+            $candidateKeys[] = str_ends_with($key, 's') ? rtrim($key, 's') : ($key . 's');
+        } else {
+            // ถ้าเป็น granular key เช่น sale.create.branch ให้ลองตัดคำ action ย่อย เช่น 'create'
             $parts = explode('.', $key);
             if (isset($parts[1])) {
-                $candidateKeys[] = $parts[1]; // เช่น 'create', 'view'
+                $candidateKeys[] = $parts[1];
             }
         }
+
+        $candidateKeys = array_values(array_unique(array_filter($candidateKeys)));
 
         // ค้นหาในไฟล์ประจำโมดูล
         foreach ($candidateKeys as $cKey) {
