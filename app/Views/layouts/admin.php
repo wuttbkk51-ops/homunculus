@@ -13,10 +13,11 @@
         })();
     </script>
 
-    <!-- Google Fonts & System Typography -->
+    <!-- CDN Preconnect & DNS-Prefetch เพื่อความเร็วสูงสุด -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Bootstrap Icons (AdminLTE 4 Default) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -28,10 +29,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte-colors.min.css">
 
+    <!-- Google Font (โหลดแบบ Non-blocking ไม่หน่วงการ Render) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"></noscript>
+
     <style>
-        /* กำหนด Font สากลสำหรับภาษาไทยให้ดูสวยงาม เป็นทางการ ไม่กระทบ layout AdminLTE 4 */
+        /* ใช้ Native System UI Font ทันที (0ms) ระหว่างรอเว็บฟอนต์ */
         body {
-            font-family: 'Sarabun', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Sarabun', 'Noto Sans Thai', sans-serif;
         }
 
         /* โทน Semi-Dark Navy เสริมสำหรับ AdminLTE */
