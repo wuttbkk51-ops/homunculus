@@ -40,54 +40,54 @@ final class NavHelperTest extends CIUnitTestCase
     }
 
     /**
-     * ทดสอบ navbar_resolve_module() ในการแปลง module alias ไปเป็น wildcard permission
+     * ทดสอบ nav_resolve_module() ในการแปลง module alias ไปเป็น wildcard permission
      */
     public function testModuleResolution(): void
     {
-        $this->assertSame('sale.*', navbar_resolve_module('sales'));
-        $this->assertSame('sale.*', navbar_resolve_module('sale'));
-        $this->assertSame('product.*', navbar_resolve_module('items'));
-        $this->assertSame('product.*', navbar_resolve_module('item'));
-        $this->assertSame('product.*', navbar_resolve_module('products'));
-        $this->assertSame('user.*', navbar_resolve_module('users'));
-        $this->assertSame('branch.*', navbar_resolve_module('branches'));
-        $this->assertSame('report.*', navbar_resolve_module('reports'));
-        $this->assertSame('admin.settings', navbar_resolve_module('settings'));
-        $this->assertSame('sale.create.branch', navbar_resolve_module('sale.create.branch'));
-        $this->assertSame('custom_module.*', navbar_resolve_module('custom_module'));
+        $this->assertSame('sale.*', nav_resolve_module('sales'));
+        $this->assertSame('sale.*', nav_resolve_module('sale'));
+        $this->assertSame('product.*', nav_resolve_module('items'));
+        $this->assertSame('product.*', nav_resolve_module('item'));
+        $this->assertSame('product.*', nav_resolve_module('products'));
+        $this->assertSame('user.*', nav_resolve_module('users'));
+        $this->assertSame('branch.*', nav_resolve_module('branches'));
+        $this->assertSame('report.*', nav_resolve_module('reports'));
+        $this->assertSame('admin.settings', nav_resolve_module('settings'));
+        $this->assertSame('sale.create.branch', nav_resolve_module('sale.create.branch'));
+        $this->assertSame('custom_module.*', nav_resolve_module('custom_module'));
     }
 
     /**
-     * ทดสอบ navbar_default_icon()
+     * ทดสอบ nav_default_icon()
      */
     public function testDefaultIconResolution(): void
     {
-        $this->assertSame('bi bi-cart3', navbar_default_icon('sales'));
-        $this->assertSame('bi bi-cart3', navbar_default_icon('sale'));
-        $this->assertSame('bi bi-box-seam', navbar_default_icon('items'));
-        $this->assertSame('bi bi-person-gear', navbar_default_icon('users'));
-        $this->assertSame('bi bi-building', navbar_default_icon('branches'));
-        $this->assertSame('bi bi-cart3', navbar_default_icon('sale.create.branch'));
+        $this->assertSame('bi bi-cart3', nav_default_icon('sales'));
+        $this->assertSame('bi bi-cart3', nav_default_icon('sale'));
+        $this->assertSame('bi bi-box-seam', nav_default_icon('items'));
+        $this->assertSame('bi bi-person-gear', nav_default_icon('users'));
+        $this->assertSame('bi bi-building', nav_default_icon('branches'));
+        $this->assertSame('bi bi-cart3', nav_default_icon('sale.create.branch'));
     }
 
     /**
-     * ทดสอบ navbar_resolve_module_file() สำหรับแมป key ไปยังไฟล์ภาษาประจำโมดูล
+     * ทดสอบ nav_resolve_module_file() สำหรับแมป key ไปยังไฟล์ภาษาประจำโมดูล
      */
     public function testModuleFileResolution(): void
     {
-        $this->assertSame('Sales', navbar_resolve_module_file('sales'));
-        $this->assertSame('Sales', navbar_resolve_module_file('sale'));
-        $this->assertSame('Sales', navbar_resolve_module_file('sale.create.branch'));
-        $this->assertSame('Items', navbar_resolve_module_file('items'));
-        $this->assertSame('Items', navbar_resolve_module_file('product.create.all'));
-        $this->assertSame('Users', navbar_resolve_module_file('users'));
-        $this->assertSame('Dashboard', navbar_resolve_module_file('dashboard'));
-        $this->assertSame('Reports', navbar_resolve_module_file('reports'));
-        $this->assertSame('Settings', navbar_resolve_module_file('settings'));
+        $this->assertSame('Sales', nav_resolve_module_file('sales'));
+        $this->assertSame('Sales', nav_resolve_module_file('sale'));
+        $this->assertSame('Sales', nav_resolve_module_file('sale.create.branch'));
+        $this->assertSame('Items', nav_resolve_module_file('items'));
+        $this->assertSame('Items', nav_resolve_module_file('product.create.all'));
+        $this->assertSame('Users', nav_resolve_module_file('users'));
+        $this->assertSame('Dashboard', nav_resolve_module_file('dashboard'));
+        $this->assertSame('Reports', nav_resolve_module_file('reports'));
+        $this->assertSame('Settings', nav_resolve_module_file('settings'));
     }
 
     /**
-     * ทดสอบ navbar_resolve_label() จากไฟล์ภาษาแยกตามโมดูล (Dashboard, Users, Items, Sales, Reports, Settings)
+     * ทดสอบ nav_resolve_label() จากไฟล์ภาษาแยกตามโมดูล (Dashboard, Users, Items, Sales, Reports, Settings)
      * กติกา: ดึงตรงตามชื่อ key (เช่น dashboard -> 'Dashboard.dashboard') และไม่มี 'module_name' อีกต่อไป
      */
     public function testLabelResolution(): void
@@ -98,31 +98,31 @@ final class NavHelperTest extends CIUnitTestCase
         $this->assertSame('Dashboard.module_name', lang('Dashboard.module_name'));
         $this->assertSame('แดชบอร์ด', lang('Dashboard.dashboard'));
 
-        // ตรวจสอบครบทั้ง 6 โมดูลหลักผ่าน navbar_resolve_label()
-        $this->assertSame('แดชบอร์ด', navbar_resolve_label('dashboard'));
-        $this->assertSame('การขาย & POS', navbar_resolve_label('sales'));
-        $this->assertSame('สินค้า & สต็อก', navbar_resolve_label('items'));
-        $this->assertSame('ผู้ใช้งาน & พนักงาน', navbar_resolve_label('users'));
-        $this->assertSame('รายงาน & สถิติ', navbar_resolve_label('reports'));
-        $this->assertSame('ตั้งค่าระบบ', navbar_resolve_label('settings'));
+        // ตรวจสอบครบทั้ง 6 โมดูลหลักผ่าน nav_resolve_label()
+        $this->assertSame('แดชบอร์ด', nav_resolve_label('dashboard'));
+        $this->assertSame('การขาย & POS', nav_resolve_label('sales'));
+        $this->assertSame('สินค้า & สต็อก', nav_resolve_label('items'));
+        $this->assertSame('ผู้ใช้งาน & พนักงาน', nav_resolve_label('users'));
+        $this->assertSame('รายงาน & สถิติ', nav_resolve_label('reports'));
+        $this->assertSame('ตั้งค่าระบบ', nav_resolve_label('settings'));
 
         // ตรวจสอบระดับ Granular
-        $this->assertSame('เปิดบิลขายหน้าร้าน', navbar_resolve_label('sale.create.branch'));
-        $this->assertSame('เพิ่มรายการสินค้าใหม่', navbar_resolve_label('product.create.all'));
+        $this->assertSame('เปิดบิลขายหน้าร้าน', nav_resolve_label('sale.create.branch'));
+        $this->assertSame('เพิ่มรายการสินค้าใหม่', nav_resolve_label('product.create.all'));
 
         // ตรวจสอบ Override
-        $this->assertSame('เปิดบิลด่วน', navbar_resolve_label('sale.create.branch', 'เปิดบิลด่วน'));
+        $this->assertSame('เปิดบิลด่วน', nav_resolve_label('sale.create.branch', 'เปิดบิลด่วน'));
     }
 
     /**
-     * ทดสอบเมื่อผู้ใช้ไม่มีสิทธิ์เข้าถึง navbar() ต้องคืนค่าสตริงว่าง '' ปลอดภัย 100%
+     * ทดสอบเมื่อผู้ใช้ไม่มีสิทธิ์เข้าถึง navItem(), navLink(), navButton() ต้องคืนค่าสตริงว่าง '' ปลอดภัย 100%
      */
-    public function testNavbarReturnsEmptyWhenUnauthorized(): void
+    public function testNavReturnsEmptyWhenUnauthorized(): void
     {
         // ยังไม่ได้ล็อกอิน
-        $this->assertSame('', navbar('sales', 'admin/sales'));
-        $this->assertSame('', navbar('sale.create.branch', 'admin/pos'));
-        $this->assertSame('', navbar('users', 'admin/users'));
+        $this->assertSame('', navItem('sales', 'admin/sales'));
+        $this->assertSame('', navLink('sale.create.branch', 'admin/pos'));
+        $this->assertSame('', navButton('users', 'admin/users'));
     }
 
     /**
@@ -168,9 +168,9 @@ final class NavHelperTest extends CIUnitTestCase
     }
 
     /**
-     * ทดสอบเมื่อผู้ใช้มีสิทธิ์ (SuperAdmin) navbar() ต้องพ่น HTML DOM ที่ถูกต้องตาม options
+     * ทดสอบเมื่อผู้ใช้มีสิทธิ์ (SuperAdmin) navLink(), navButton(), dropdownItem(), navItem() ต้องพ่น HTML DOM ที่ถูกต้อง
      */
-    public function testNavbarRendersDomForAuthorizedUser(): void
+    public function testNavRendersDomForAuthorizedUser(): void
     {
         // สร้างและล็อกอิน SuperAdmin
         $userModel = model(UserModel::class);
@@ -187,16 +187,15 @@ final class NavHelperTest extends CIUnitTestCase
 
         service('language')->setLocale('th');
 
-        // 1. ทดสอบแบบโมดูล default (nav-link)
-        $html1 = navbar('sales', 'admin/sales');
+        // 1. ทดสอบแบบ navLink
+        $html1 = navLink('sales', 'admin/sales');
         $this->assertStringContainsString('class="nav-link"', $html1);
         $this->assertStringContainsString('admin/sales', $html1);
         $this->assertStringContainsString('bi bi-cart3', $html1);
         $this->assertStringContainsString('การขาย', $html1);
 
-        // 2. ทดสอบแบบ Button
-        $html2 = navbar('sale.create.branch', 'admin/pos', [
-            'as'    => 'button',
+        // 2. ทดสอบแบบ navButton
+        $html2 = navButton('sale.create.branch', 'admin/pos', [
             'class' => 'btn btn-primary btn-sm',
             'icon'  => 'bi bi-plus-lg',
         ]);
@@ -205,36 +204,35 @@ final class NavHelperTest extends CIUnitTestCase
         $this->assertStringContainsString('bi bi-plus-lg', $html2);
         $this->assertStringContainsString('เปิดบิลขายหน้าร้าน', $html2);
 
-        // 3. ทดสอบแบบ Dropdown-Item พร้อม Override Label
-        $html3 = navbar('users', 'admin/users', [
-            'as'    => 'dropdown-item',
+        // 3. ทดสอบแบบ dropdownItem พร้อม Override Label
+        $html3 = dropdownItem('users', 'admin/users', [
             'label' => 'จัดการพนักงานทั้งหมด',
         ]);
         $this->assertStringContainsString('class="dropdown-item"', $html3);
         $this->assertStringContainsString('admin/users', $html3);
         $this->assertStringContainsString('จัดการพนักงานทั้งหมด', $html3);
 
-        // 4. ทดสอบแบบ Nav-Link มี Wrapper (<li>)
-        $html4 = navbar('items', 'admin/products', ['wrapper' => true]);
+        // 4. ทดสอบแบบ navItem ที่มี Wrapper (<li>)
+        $html4 = navItem('items', 'admin/products');
         $this->assertStringStartsWith('<li class="nav-item">', $html4);
         $this->assertStringEndsWith('</li>', $html4);
 
         // 5. ทดสอบกรณีไม่ต้องการ Icon (icon = false)
-        $html5 = navbar('sales', 'admin/sales', ['icon' => false]);
+        $html5 = navLink('sales', 'admin/sales', ['icon' => false]);
         $this->assertStringNotContainsString('<i class="', $html5);
     }
 
     /**
-     * ทดสอบฟังก์ชัน Page Header Title และ Breadcrumbs
+     * ทดสอบฟังก์ชัน Page Header Title และ Breadcrumbs (pageTitle, breadcrumb, pageHeader)
      */
     public function testPageHeaderAndBreadcrumbHelpers(): void
     {
-        $titleHtml = page_header_title('ภาพรวมระบบ', 'คำอธิบายสั้น', 'bi bi-speedometer2');
+        $titleHtml = pageTitle('ภาพรวมระบบ', 'คำอธิบายสั้น', 'bi bi-speedometer2');
         $this->assertStringContainsString('ภาพรวมระบบ', $titleHtml);
         $this->assertStringContainsString('คำอธิบายสั้น', $titleHtml);
         $this->assertStringContainsString('bi bi-speedometer2', $titleHtml);
 
-        $breadcrumbHtml = render_breadcrumbs([
+        $breadcrumbHtml = breadcrumb([
             'หน้าหลัก' => 'dashboard',
             'การขาย'   => 'admin/sales',
             'เปิดบิล'  => null,
@@ -245,7 +243,7 @@ final class NavHelperTest extends CIUnitTestCase
         $this->assertStringContainsString('active', $breadcrumbHtml);
         $this->assertStringContainsString('เปิดบิล', $breadcrumbHtml);
 
-        $fullHeaderHtml = render_page_header(
+        $fullHeaderHtml = pageHeader(
             'จัดการสินค้า',
             'หมวดหมู่และสต็อก',
             'bi bi-box-seam',

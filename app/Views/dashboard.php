@@ -78,7 +78,7 @@
                     <div>
                         <span class="text-secondary small fw-medium">Tenant ID</span>
                         <h5 class="fw-bold text-body-emphasis mb-0 mt-1">
-                            <?= esc(current_tenant_id() ?? 'NULL (SuperAdmin)') ?>
+                            <?= esc(tenant_id() ?? 'NULL (SuperAdmin)') ?>
                         </h5>
                     </div>
                     <div class="bg-info-subtle text-info rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
@@ -130,7 +130,7 @@
                                 <th class="text-secondary small ps-3">Tenant ID</th>
                                 <td class="pe-3">
                                     <span class="badge bg-secondary-subtle text-secondary-emphasis">
-                                        <?= esc(current_tenant_id() ?? 'SuperAdmin (ไม่มี Tenant)') ?>
+                                        <?= esc(tenant_id() ?? 'SuperAdmin (ไม่มี Tenant)') ?>
                                     </span>
                                 </td>
                             </tr>

@@ -1,7 +1,7 @@
 <?php
 $user = auth()->user();
 $myBranches = user_branches();
-$activeBranchId = active_branch_id();
+$activeBranchId = branch_id();
 ?>
 <nav class="app-header navbar navbar-expand bg-body shadow-sm">
     <div class="container-fluid">
@@ -91,7 +91,7 @@ $activeBranchId = active_branch_id();
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <span class="dropdown-item-text small text-secondary">
-                            <i class="bi bi-hash me-1"></i>Tenant ID: <?= esc(current_tenant_id() ?? 'SuperAdmin') ?>
+                            <i class="bi bi-hash me-1"></i>Tenant ID: <?= esc(tenant_id() ?? 'SuperAdmin') ?>
                         </span>
                     </li>
                     <li><hr class="dropdown-divider"></li>

@@ -27,16 +27,6 @@ if (! function_exists('auth_can')) {
     }
 }
 
-if (! function_exists('active_branch_id')) {
-    /**
-     * ดึง ID ของสาขาที่ Active อยู่ในปัจจุบัน (Alias ของ branch_id())
-     */
-    function active_branch_id(): ?int
-    {
-        return branch_id();
-    }
-}
-
 if (! function_exists('active_branch')) {
     /**
      * ดึงข้อมูลสาขาที่ Active อยู่ในปัจจุบัน
@@ -66,16 +56,6 @@ if (! function_exists('user_branches')) {
         $branchService = service('branch_service');
 
         return $branchService->getUserBranches((int) $user->id);
-    }
-}
-
-if (! function_exists('current_tenant_id')) {
-    /**
-     * ดึง ID ของ Tenant ประจำตัวผู้ใช้ที่ล็อกอินอยู่ (Alias ของ tenant_id())
-     */
-    function current_tenant_id(): ?int
-    {
-        return tenant_id();
     }
 }
 
