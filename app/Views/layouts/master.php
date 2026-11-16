@@ -13,19 +13,8 @@
 
         <!-- Main Content Area -->
         <main class="app-main">
-            <!-- App Content Header -->
-            <div class="app-content-header py-3">
-                <div class="container-fluid">
-                    <div class="row align-items-center">
-                        <div class="col-sm-6">
-                            <?= $this->renderSection('pageHeader') ?: '<h3 class="mb-0 fw-bold fs-4">ระบบจัดการ</h3>' ?>
-                        </div>
-                        <div class="col-sm-6 text-sm-end">
-                            <?= $this->renderSection('breadcrumb') ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- App Content Header (Page Header & Breadcrumbs) -->
+            <?= $this->include('layouts/partials/page_header') ?>
 
             <!-- App Content Body -->
             <div class="app-content pb-4">

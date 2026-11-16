@@ -132,6 +132,9 @@ final class ViewRenderTest extends CIUnitTestCase
         $result->assertSee('manager');
         $result->assertSee('Contextual State');
         $result->assertSee('Permission-First');
+        $result->assertSee('app-content-header');
+        $result->assertSee('breadcrumb');
+        $result->assertSee('navbar_helper');
         // ตรวจสอบว่า custom styles & scripts block ทำงานได้จริง
         $result->assertSee('dashboard-stat-card');
         $result->assertSee('Homunculus Dashboard Initialized');
