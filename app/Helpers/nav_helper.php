@@ -260,9 +260,18 @@ if (! function_exists('_nav_render')) {
         $customAttrs = nav_build_attrs($options['attrs'] ?? []);
         $extraClass  = trim((string) ($options['class'] ?? ''));
 
+        // กำหนดสถานะ Active หากระบุใน options
+        if (! empty($options['active'])) {
+            $extraClass = trim($extraClass . ' active');
+        }
+
         // 5. Icon & Badge HTML
-        $spacing  = ($type === 'button' || $type === 'btn') ? 'me-1' : 'me-2';
-        $iconHtml = $icon ? '<i class="' . esc($icon) . ' ' . $spacing . '"></i>' : '';
+        $spacing   = ($type === 'button' || $type === 'btn') ? 'me-1' : 'me-2';
+        $iconClass = esc((string) $icon);
+        if (($type === 'nav-item' || $type === 'nav-link') && $iconClass !== '' && ! str_contains($iconClass, 'nav-icon')) {
+            $iconClass = 'nav-icon ' . $iconClass;
+        }
+        $iconHtml  = $icon ? '<i class="' . $iconClass . ' ' . $spacing . '"></i>' : '';
 
         $badgeHtml = '';
         if (! empty($options['badge'])) {
@@ -275,6 +284,8 @@ if (! function_exists('_nav_render')) {
 
         $safeUrl   = esc($targetUrl);
         $safeLabel = esc($label);
+        $textTag   = $options['tag'] ?? (($type === 'nav-item') ? 'p' : 'span');
+        $labelHtml = "<{$textTag}>{$safeLabel}</{$textTag}>";
 
         // 6. พ่น DOM ตามประเภทที่เลือก
         switch ($type) {
@@ -297,7 +308,7 @@ if (! function_exists('_nav_render')) {
             default:
                 $linkClass = trim('nav-link ' . $extraClass);
                 $linkDom   = '<a href="' . $safeUrl . '" class="' . esc($linkClass) . '"' . $customAttrs . '>'
-                    . $iconHtml . '<span>' . $safeLabel . '</span>' . $badgeHtml
+                    . $iconHtml . $labelHtml . $badgeHtml
                     . '</a>';
 
                 $shouldWrap = ($type === 'nav-item') || ! empty($options['wrapper']);
