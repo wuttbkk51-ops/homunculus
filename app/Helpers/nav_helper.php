@@ -218,10 +218,14 @@ if (! function_exists('_nav_render')) {
      * @param string $type ประเภทการแสดงผล 'nav-link', 'nav-item', 'dropdown-item', 'button'
      * @param string|null $permission ชื่อสิทธิ์หรือโมดูล (ส่ง null เพื่อข้ามการเช็คสิทธิ์)
      * @param string|array<string, mixed> $urlOrOptions URL หรือ array options
-     * @param array<string, mixed> $options ตัวเลือกเพิ่มเติม
+     * @param array<string, mixed>|string $options ตัวเลือกเพิ่มเติม หรือข้อความ Label
      */
-    function _nav_render(string $type, ?string $permission = null, $urlOrOptions = '#', array $options = []): string
+    function _nav_render(string $type, ?string $permission = null, $urlOrOptions = '#', array|string $options = []): string
     {
+        if (is_string($options)) {
+            $options = ['label' => $options];
+        }
+
         if (is_array($urlOrOptions)) {
             $options = array_merge($urlOrOptions, $options);
             $url     = $options['url'] ?? '#';
@@ -260,8 +264,9 @@ if (! function_exists('_nav_render')) {
         $customAttrs = nav_build_attrs($options['attrs'] ?? []);
         $extraClass  = trim((string) ($options['class'] ?? ''));
 
-        // กำหนดสถานะ Active หากระบุใน options
-        if (! empty($options['active'])) {
+        // ตรวจจับสถานะ Active อัตโนมัติ หากระบุใน options หรือตรงกับ URL ปัจจุบัน
+        $isActive = $options['active'] ?? ($url !== '#' && $url !== '' && admin_menu_is_active($url));
+        if ($isActive && ! str_contains($extraClass, 'active')) {
             $extraClass = trim($extraClass . ' active');
         }
 
@@ -334,7 +339,7 @@ if (! function_exists('navLink')) {
     /**
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.nav-link`
      */
-    function navLink(?string $permission = null, $urlOrOptions = '#', array $options = []): string
+    function navLink(?string $permission = null, $urlOrOptions = '#', array|string $options = []): string
     {
         return _nav_render('nav-link', $permission, $urlOrOptions, $options);
     }
@@ -345,7 +350,7 @@ if (! function_exists('navItem')) {
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.nav-item`
      * พ่น <li class="nav-item"><a class="nav-link" ...>...</a></li>
      */
-    function navItem(?string $permission = null, $urlOrOptions = '#', array $options = []): string
+    function navItem(?string $permission = null, $urlOrOptions = '#', array|string $options = []): string
     {
         return _nav_render('nav-item', $permission, $urlOrOptions, $options);
     }
@@ -355,7 +360,7 @@ if (! function_exists('dropdownItem')) {
     /**
      * สร้าง HTML สำหรับ AdminLTE / Bootstrap Native `.dropdown-item`
      */
-    function dropdownItem(?string $permission = null, $urlOrOptions = '#', array $options = []): string
+    function dropdownItem(?string $permission = null, $urlOrOptions = '#', array|string $options = []): string
     {
         return _nav_render('dropdown-item', $permission, $urlOrOptions, $options);
     }
@@ -365,7 +370,7 @@ if (! function_exists('navButton')) {
     /**
      * สร้าง HTML สำหรับปุ่ม Action Button (AdminLTE / Bootstrap Native `.btn`)
      */
-    function navButton(?string $permission = null, $urlOrOptions = '#', array $options = []): string
+    function navButton(?string $permission = null, $urlOrOptions = '#', array|string $options = []): string
     {
         return _nav_render('button', $permission, $urlOrOptions, $options);
     }
@@ -492,14 +497,87 @@ if (! function_exists('admin_menu_is_active')) {
      */
     function admin_menu_is_active(string $path): bool
     {
-        $currentUri = trim(uri_string(), '/');
-        $targetUri  = trim($path, '/');
+        $targetUri = trim($path, '/');
+        if ($targetUri === '' || $targetUri === '#') {
+            return false;
+        }
 
+        $currentUri = trim(uri_string(), '/');
         if ($currentUri === $targetUri) {
             return true;
         }
 
-        return $targetUri !== '' && str_starts_with($currentUri, $targetUri . '/');
+        return str_starts_with($currentUri, $targetUri . '/');
+    }
+}
+
+if (! function_exists('navHeader')) {
+    /**
+     * สร้าง Header คั่นหมวดหมู่สำหรับ AdminLTE 4 Sidebar
+     */
+    function navHeader(string $title): string
+    {
+        return '<li class="nav-header">' . esc($title) . '</li>' . "\n";
+    }
+}
+
+if (! function_exists('navTree')) {
+    /**
+     * สร้าง Treeview (Submenu กลุ่ม) สำหรับ AdminLTE 4 Sidebar แบบ Clean & Minimal
+     * รองรับ Contextual RBAC, i18n Auto-Resolve และตรวจจับ Active/Open อัตโนมัติ
+     *
+     * @param string|null $permission รหัสสิทธิ์หรือชื่อโมดูล เช่น 'tenants', 'sales'
+     * @param array<int, string>|string $children รายการเมนูลูก (ผลลัพธ์จาก navItem() หรือ HTML)
+     * @param array<string, mixed>|string $options ตัวเลือกเพิ่มเติม หรือกำหนด custom label
+     */
+    function navTree(?string $permission = null, $children = [], array|string $options = []): string
+    {
+        if (is_string($options)) {
+            $options = ['label' => $options];
+        }
+
+        $childList = is_array($children) ? $children : [$children];
+        $visibleChildren = array_filter($childList, static fn ($item) => trim((string) $item) !== '');
+
+        if (empty($visibleChildren)) {
+            return '';
+        }
+
+        $label = ($permission !== null && $permission !== '')
+            ? nav_resolve_label($permission, $options['label'] ?? null)
+            : ($options['label'] ?? '');
+
+        $icon = null;
+        if (! array_key_exists('icon', $options)) {
+            $icon = ($permission !== null && $permission !== '') ? nav_default_icon($permission) : null;
+        } elseif ($options['icon'] !== false && $options['icon'] !== null && $options['icon'] !== '') {
+            $icon = (string) $options['icon'];
+        }
+
+        $joinedChildren = implode("\n", $visibleChildren);
+        $hasActiveChild = str_contains($joinedChildren, 'class="nav-link active"')
+            || str_contains($joinedChildren, 'class="nav-link  active"')
+            || str_contains($joinedChildren, 'nav-link active');
+
+        $isMenuOpen = ! empty($options['open']) || $hasActiveChild;
+        $isActive   = ! empty($options['active']) || $hasActiveChild;
+
+        $parentClass = 'nav-item' . ($isMenuOpen ? ' menu-open' : '');
+        $linkClass   = 'nav-link' . ($isActive ? ' active' : '');
+        $iconClass   = $icon ? ('nav-icon ' . esc($icon)) : 'nav-icon bi bi-circle';
+        $safeTitle   = esc($label);
+
+        $html  = "<li class=\"{$parentClass}\">\n";
+        $html .= "    <a href=\"#\" class=\"{$linkClass}\">\n";
+        $html .= "        <i class=\"{$iconClass}\"></i>\n";
+        $html .= "        <p>{$safeTitle}<i class=\"nav-arrow bi bi-chevron-right\"></i></p>\n";
+        $html .= "    </a>\n";
+        $html .= "    <ul class=\"nav nav-treeview\">\n";
+        $html .= $joinedChildren . "\n";
+        $html .= "    </ul>\n";
+        $html .= "</li>\n";
+
+        return $html;
     }
 }
 

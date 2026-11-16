@@ -334,5 +334,24 @@ final class NavHelperTest extends CIUnitTestCase
         $this->assertStringContainsString('bi bi-cart3', $sidebarHtml);
         $this->assertStringContainsString('ตั้งค่าระบบ', $sidebarHtml);
         $this->assertStringContainsString('bi bi-gear', $sidebarHtml);
+
+        // 8. navHeader() & navTree() -> Clean & Minimal Sidebar Building Helpers
+        $headerHtml = navHeader('ระบบงานหลัก');
+        $this->assertStringContainsString('<li class="nav-header">ระบบงานหลัก</li>', $headerHtml);
+
+        $treeHtml = navTree('tenants', [
+            navItem('tenant.view.*', 'admin/tenants', 'รายชื่อองค์กร / ผู้เช่า'),
+            navItem('tenant.create.*', 'admin/tenants/new', 'ลงทะเบียนผู้เช่าใหม่'),
+        ]);
+        $this->assertStringStartsWith('<li class="nav-item', $treeHtml);
+        $this->assertStringContainsString('nav-treeview', $treeHtml);
+        $this->assertStringContainsString('ผู้เช่า &amp; องค์กร', $treeHtml);
+        $this->assertStringContainsString('bi bi-buildings', $treeHtml);
+        $this->assertStringContainsString('รายชื่อองค์กร / ผู้เช่า', $treeHtml);
+        $this->assertStringContainsString('nav-arrow bi bi-chevron-right', $treeHtml);
+
+        // navTree เมื่อไม่มีลูกที่แสดงผลได้ ต้องคืนค่า '' ว่างเปล่า
+        $emptyTree = navTree('tenants', []);
+        $this->assertSame('', $emptyTree);
     }
 }
