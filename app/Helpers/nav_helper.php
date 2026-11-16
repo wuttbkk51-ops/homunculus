@@ -130,6 +130,8 @@ if (! function_exists('nav_resolve_module_file')) {
             'admin'      => 'Settings',
             'branch'     => 'Settings',
             'branches'   => 'Settings',
+            'tenant'     => 'Tenants',
+            'tenants'    => 'Tenants',
         ];
 
         return $map[$prefix] ?? ucfirst($prefix);
@@ -500,42 +502,52 @@ if (! function_exists('get_admin_menu_items')) {
     function get_admin_menu_items(): array
     {
         return [
+            // 1. Dashboard (แดชบอร์ด)
             [
-                'type'  => 'header',
-                'title' => 'ระบบหลัก',
-            ],
-            [
-                'title'      => 'แดชบอร์ด',
+                'permission' => 'dashboard',
                 'url'        => 'dashboard',
-                'icon'       => 'bi bi-speedometer2',
-                'permission' => null, // แดชบอร์ดแสดงผลเสมอสำหรับผู้เข้าสู่ระบบ
+                'auth'       => false, // แดชบอร์ดแสดงผลเสมอ
             ],
+
+            // 2. Tenants (ผู้เช่า & องค์กร)
             [
-                'type'  => 'header',
-                'title' => 'งานขายและคลังสินค้า',
-            ],
-            [
-                'permission' => 'sales',
+                'permission' => 'tenants',
                 'children'   => [
                     [
-                        'permission' => 'sale.create.branch',
-                        'url'        => 'admin/pos',
-                        'icon'       => 'bi bi-shop',
+                        'permission' => 'tenant.view.*',
+                        'title'      => 'รายชื่อองค์กร / ผู้เช่า',
+                        'url'        => 'admin/tenants',
+                        'icon'       => 'bi bi-buildings',
                     ],
                     [
-                        'permission' => 'sale.view.*',
-                        'title'      => 'รายการขายทั้งหมด',
-                        'url'        => 'admin/sales',
-                        'icon'       => 'bi bi-receipt',
-                    ],
-                    [
-                        'permission' => 'customer.view.*',
-                        'title'      => 'ลูกค้า & สมาชิก',
-                        'url'        => 'admin/customers',
-                        'icon'       => 'bi bi-people',
+                        'permission' => 'tenant.create.*',
+                        'title'      => 'ลงทะเบียนผู้เช่าใหม่',
+                        'url'        => 'admin/tenants/new',
+                        'icon'       => 'bi bi-building-add',
                     ],
                 ],
             ],
+
+            // 3. Users (ผู้ใช้งาน & พนักงาน)
+            [
+                'permission' => 'users',
+                'children'   => [
+                    [
+                        'permission' => 'user.view.all',
+                        'title'      => 'รายชื่อพนักงาน',
+                        'url'        => 'admin/users',
+                        'icon'       => 'bi bi-people',
+                    ],
+                    [
+                        'permission' => 'user.manage.all',
+                        'title'      => 'จัดการสิทธิ์ & บทบาท',
+                        'url'        => 'admin/roles',
+                        'icon'       => 'bi bi-shield-lock',
+                    ],
+                ],
+            ],
+
+            // 4. Items (สินค้า & สต็อก)
             [
                 'permission' => 'items',
                 'children'   => [
@@ -559,53 +571,49 @@ if (! function_exists('get_admin_menu_items')) {
                     ],
                 ],
             ],
+
+            // 5. Sales (การขาย & POS)
             [
-                'permission' => 'reports',
+                'permission' => 'sales',
                 'children'   => [
                     [
-                        'permission' => 'report.view.*',
-                        'title'      => 'รายงานยอดขาย',
-                        'url'        => 'admin/reports/sales',
-                        'icon'       => 'bi bi-cash-stack',
+                        'permission' => 'sale.create.branch',
+                        'title'      => 'เปิดบิลขายหน้าร้าน (POS)',
+                        'url'        => 'admin/pos',
+                        'icon'       => 'bi bi-shop',
                     ],
                     [
-                        'permission' => 'report.view.*',
-                        'title'      => 'รายงานสต็อกสินค้า',
-                        'url'        => 'admin/reports/inventory',
-                        'icon'       => 'bi bi-journal-text',
+                        'permission' => 'sale.view.*',
+                        'title'      => 'รายการขายทั้งหมด',
+                        'url'        => 'admin/sales',
+                        'icon'       => 'bi bi-receipt',
                     ],
-                ],
-            ],
-            [
-                'type'  => 'header',
-                'title' => 'ตั้งค่า & จัดการระบบ',
-            ],
-            [
-                'permission' => 'branch.view.all',
-                'title'      => 'จัดการสาขา',
-                'url'        => 'admin/branches',
-                'icon'       => 'bi bi-building',
-            ],
-            [
-                'permission' => 'users',
-                'children'   => [
                     [
-                        'permission' => 'user.view.all',
-                        'title'      => 'รายชื่อพนักงาน',
-                        'url'        => 'admin/users',
+                        'permission' => 'customer.view.*',
+                        'title'      => 'ข้อมูลลูกค้า & สมาชิก',
+                        'url'        => 'admin/customers',
                         'icon'       => 'bi bi-person-lines-fill',
                     ],
-                    [
-                        'permission' => 'user.manage.all',
-                        'title'      => 'มอบหมายและจัดการสิทธิ์',
-                        'url'        => 'admin/roles',
-                        'icon'       => 'bi bi-key',
-                    ],
                 ],
             ],
+
+            // 6. Settings (ตั้งค่าระบบ)
             [
                 'permission' => 'settings',
-                'url'        => 'admin/settings',
+                'children'   => [
+                    [
+                        'permission' => 'admin.settings',
+                        'title'      => 'ตั้งค่าทั่วไป',
+                        'url'        => 'admin/settings',
+                        'icon'       => 'bi bi-sliders',
+                    ],
+                    [
+                        'permission' => 'branch.view.all',
+                        'title'      => 'จัดการสาขา',
+                        'url'        => 'admin/branches',
+                        'icon'       => 'bi bi-building',
+                    ],
+                ],
             ],
         ];
     }
@@ -629,10 +637,11 @@ if (! function_exists('sidebarMenu')) {
                 continue;
             }
 
-            $permission = $item['permission'] ?? null;
+            $permission   = $item['permission'] ?? null;
+            $requiresAuth = $item['auth'] ?? ($permission !== null && $permission !== '');
 
             // ตรวจสอบสิทธิ์เมนูหลัก
-            if ($permission !== null && $permission !== '' && ! auth_can(nav_resolve_module($permission))) {
+            if ($requiresAuth && ! auth_can(nav_resolve_module((string) $permission))) {
                 continue;
             }
 

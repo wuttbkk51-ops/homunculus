@@ -64,6 +64,7 @@ final class ViewRenderTest extends CIUnitTestCase
 
     public function testSidebarMenuHelperWorks(): void
     {
+        service('language')->setLocale('th');
         helper(['auth', 'nav']);
 
         $menuHtml = sidebarMenu();

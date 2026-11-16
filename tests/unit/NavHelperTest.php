@@ -84,10 +84,12 @@ final class NavHelperTest extends CIUnitTestCase
         $this->assertSame('Dashboard', nav_resolve_module_file('dashboard'));
         $this->assertSame('Reports', nav_resolve_module_file('reports'));
         $this->assertSame('Settings', nav_resolve_module_file('settings'));
+        $this->assertSame('Tenants', nav_resolve_module_file('tenants'));
+        $this->assertSame('Tenants', nav_resolve_module_file('tenant'));
     }
 
     /**
-     * ทดสอบ nav_resolve_label() จากไฟล์ภาษาแยกตามโมดูล (Dashboard, Users, Items, Sales, Reports, Settings)
+     * ทดสอบ nav_resolve_label() จากไฟล์ภาษาแยกตามโมดูล (Dashboard, Users, Items, Sales, Reports, Settings, Tenants)
      * กติกา: ดึงตรงตามชื่อ key (เช่น dashboard -> 'Dashboard.dashboard') และไม่มี 'module_name' อีกต่อไป
      */
     public function testLabelResolution(): void
@@ -98,8 +100,9 @@ final class NavHelperTest extends CIUnitTestCase
         $this->assertSame('Dashboard.module_name', lang('Dashboard.module_name'));
         $this->assertSame('แดชบอร์ด', lang('Dashboard.dashboard'));
 
-        // ตรวจสอบครบทั้ง 6 โมดูลหลักผ่าน nav_resolve_label()
+        // ตรวจสอบโมดูลหลักผ่าน nav_resolve_label()
         $this->assertSame('แดชบอร์ด', nav_resolve_label('dashboard'));
+        $this->assertSame('ผู้เช่า & องค์กร', nav_resolve_label('tenants'));
         $this->assertSame('การขาย & POS', nav_resolve_label('sales'));
         $this->assertSame('สินค้า & สต็อก', nav_resolve_label('items'));
         $this->assertSame('ผู้ใช้งาน & พนักงาน', nav_resolve_label('users'));
@@ -317,13 +320,19 @@ final class NavHelperTest extends CIUnitTestCase
         $this->assertStringContainsString('หัวข้อ', $headerHtml);
         $this->assertStringContainsString($btnHtml, $headerHtml);
 
-        // 7. sidebarMenu() -> ทดสอบ Sidebar Treeview และ Dynamic Language/Icon Fetching
+        // 7. sidebarMenu() -> ทดสอบ Sidebar Treeview ทั้ง 6 โมดูล (dashboard, tenants, users, items, sales, settings)
         $sidebarHtml = sidebarMenu();
         $this->assertStringContainsString('sidebar-menu', $sidebarHtml);
         $this->assertStringContainsString('แดชบอร์ด', $sidebarHtml);
-        $this->assertStringContainsString('การขาย &amp; POS', $sidebarHtml);
-        $this->assertStringContainsString('bi bi-cart3', $sidebarHtml);
+        $this->assertStringContainsString('ผู้เช่า &amp; องค์กร', $sidebarHtml);
+        $this->assertStringContainsString('bi bi-buildings', $sidebarHtml);
+        $this->assertStringContainsString('ผู้ใช้งาน &amp; พนักงาน', $sidebarHtml);
+        $this->assertStringContainsString('bi bi-people', $sidebarHtml);
         $this->assertStringContainsString('สินค้า &amp; สต็อก', $sidebarHtml);
         $this->assertStringContainsString('bi bi-box-seam', $sidebarHtml);
+        $this->assertStringContainsString('การขาย &amp; POS', $sidebarHtml);
+        $this->assertStringContainsString('bi bi-cart3', $sidebarHtml);
+        $this->assertStringContainsString('ตั้งค่าระบบ', $sidebarHtml);
+        $this->assertStringContainsString('bi bi-gear', $sidebarHtml);
     }
 }
