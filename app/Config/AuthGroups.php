@@ -2,116 +2,90 @@
 
 declare(strict_types=1);
 
-/**
- * This file is part of CodeIgniter Shield.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view
- * the LICENSE file that was distributed with this source code.
- */
-
 namespace Config;
 
 use CodeIgniter\Shield\Config\AuthGroups as ShieldAuthGroups;
 
 class AuthGroups extends ShieldAuthGroups
 {
-    /**
-     * --------------------------------------------------------------------
-     * Default Group
-     * --------------------------------------------------------------------
-     * The group that a newly registered user is added to.
-     */
     public string $defaultGroup = 'user';
 
     /**
-     * --------------------------------------------------------------------
-     * Groups
-     * --------------------------------------------------------------------
-     * An associative array of the available groups in the system, where the keys
-     * are the group names and the values are arrays of the group info.
-     *
-     * Whatever value you assign as the key will be used to refer to the group
-     * when using functions such as:
-     *      $user->addGroup('superadmin');
-     *
-     * @var array<string, array<string, string>>
-     *
-     * @see https://codeigniter4.github.io/shield/quick_start_guide/using_authorization/#change-available-groups for more info
+     * กำหนด Groups / Roles เป็น Preset สำหรับจัดกลุ่ม Permission
      */
     public array $groups = [
         'superadmin' => [
             'title'       => 'Super Admin',
-            'description' => 'Complete control of the site.',
+            'description' => 'ผู้ดูแลระบบสูงสุดของแพลตฟอร์ม เข้าถึงได้ทุก Tenant',
         ],
         'admin' => [
-            'title'       => 'Admin',
-            'description' => 'Day to day administrators of the site.',
+            'title'       => 'Tenant Admin',
+            'description' => 'ผู้ดูแลระบบประจำ Tenant มีสิทธิ์จัดการทุกสาขาใน Tenant',
         ],
-        'developer' => [
-            'title'       => 'Developer',
-            'description' => 'Site programmers.',
+        'manager' => [
+            'title'       => 'Branch Manager',
+            'description' => 'ผู้จัดการประจำสาขา มีสิทธิ์ระดับสาขา (.branch)',
+        ],
+        'cashier' => [
+            'title'       => 'Cashier',
+            'description' => 'พนักงานแคชเชียร์ประจำสาขา',
+        ],
+        'staff' => [
+            'title'       => 'Staff',
+            'description' => 'พนักงานทั่วไปประจำสาขา',
         ],
         'user' => [
             'title'       => 'User',
-            'description' => 'General users of the site. Often customers.',
-        ],
-        'beta' => [
-            'title'       => 'Beta User',
-            'description' => 'Has access to beta-level features.',
+            'description' => 'ผู้ใช้งานทั่วไป',
         ],
     ];
 
     /**
-     * --------------------------------------------------------------------
-     * Permissions
-     * --------------------------------------------------------------------
-     * The available permissions in the system.
-     *
-     * If a permission is not listed here it cannot be used.
+     * รายการสิทธิ์ตัวอย่างในระบบ (รองรับรูปแบบ {module}.{action}.{scope})
      */
     public array $permissions = [
-        'admin.access'        => 'Can access the sites admin area',
-        'admin.settings'      => 'Can access the main site settings',
-        'users.manage-admins' => 'Can manage other admins',
-        'users.create'        => 'Can create new non-admin users',
-        'users.edit'          => 'Can edit existing non-admin users',
-        'users.delete'        => 'Can delete existing non-admin users',
-        'beta.access'         => 'Can access beta-level features',
+        'admin.access'       => 'สิทธิ์เข้าใช้งานหน้า Admin',
+        'admin.settings'     => 'สิทธิ์เข้าจัดการตั้งค่าระบบ',
+        'sale.view.own'      => 'ดูยอดขายเฉพาะรายการของตนเอง',
+        'sale.view.branch'   => 'ดูยอดขายภายในสาขาของตนเอง',
+        'sale.view.all'      => 'ดูยอดขายทั้งหมดใน Tenant',
+        'sale.create.branch' => 'เปิดบิลขายภายในสาขา',
+        'sale.delete.branch' => 'ยกเลิกบิลขายภายในสาขา',
+        'report.view.branch' => 'ดูรายงานประจำสาขา',
+        'report.view.all'    => 'ดูรายงานรวมทุกสาขาใน Tenant',
+        'user.manage.all'    => 'จัดการผู้ใช้ทั้งหมดใน Tenant',
     ];
 
     /**
-     * --------------------------------------------------------------------
-     * Permissions Matrix
-     * --------------------------------------------------------------------
-     * Maps permissions to groups.
-     *
-     * This defines group-level permissions.
+     * Matrix จับคู่ Role Presets กับ Permissions
+     * รองรับ Wildcard (*) และ Scope Hierarchy (.all > .branch > .own)
      */
     public array $matrix = [
         'superadmin' => [
-            'admin.*',
-            'users.*',
-            'beta.*',
+            '*',
         ],
         'admin' => [
             'admin.access',
-            'users.create',
-            'users.edit',
-            'users.delete',
-            'beta.access',
+            '*.all',
+            'user.manage.all',
+            'sale.*',
+            'report.*',
         ],
-        'developer' => [
+        'manager' => [
             'admin.access',
-            'admin.settings',
-            'users.create',
-            'users.edit',
-            'beta.access',
+            '*.branch',
+            'sale.*',
+            'report.view.branch',
+        ],
+        'cashier' => [
+            'admin.access',
+            'sale.create.branch',
+            'sale.view.own',
+        ],
+        'staff' => [
+            'admin.access',
+            'sale.view.own',
         ],
         'user' => [],
-        'beta' => [
-            'beta.access',
-        ],
     ];
 }

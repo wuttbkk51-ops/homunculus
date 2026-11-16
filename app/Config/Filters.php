@@ -34,6 +34,8 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'tenant_active' => \App\Filters\TenantActiveFilter::class,
+        'active_branch' => \App\Filters\ActiveBranchFilter::class,
     ];
 
     /**
@@ -106,5 +108,15 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        'session' => [
+            'before' => ['admin', 'admin/*'],
+        ],
+        'tenant_active' => [
+            'before' => ['admin', 'admin/*'],
+        ],
+        'active_branch' => [
+            'before' => ['admin', 'admin/*'],
+        ],
+    ];
 }

@@ -434,7 +434,7 @@ class Auth extends ShieldAuth
      *
      * @var class-string<UserModel>
      */
-    public string $userProvider = UserModel::class;
+    public string $userProvider = \App\Models\UserModel::class;
 
     /**
      * Returns the URL that a user should be redirected
@@ -442,10 +442,11 @@ class Auth extends ShieldAuth
      */
     public function loginRedirect(): string
     {
-        $session = session();
-        $url     = $session->getTempdata('beforeLoginUrl') ?? setting('Auth.redirects')['login'];
+        /** @var \App\Services\AuthService $authService */
+        $authService = service('auth_service');
+        $result      = $authService->handlePostLogin();
 
-        return $this->getUrl($url);
+        return $this->getUrl($result['redirect']);
     }
 
     /**

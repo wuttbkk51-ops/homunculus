@@ -55,3 +55,8 @@ Events::on('pre_system', static function (): void {
         }
     }
 });
+
+// ล้างข้อมูล Active Branch ใน Session เมื่อเกิดการ Logout
+Events::on('logout', static function (): void {
+    service('branch_service')->clearActiveBranch();
+});
