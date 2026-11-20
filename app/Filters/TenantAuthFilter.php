@@ -17,6 +17,11 @@ use CodeIgniter\HTTP\ResponseInterface;
  */
 class TenantAuthFilter implements FilterInterface
 {
+    // Path สำหรับ Redirect ในฝั่ง Web เมื่อไม่ผ่านการตรวจสอบ
+    protected string $loginPath = '/login';
+    protected string $selectTenantPath = '/select-tenant';
+
+    // Flag ส่งต่อสถานะจาก before() ไป after() เพื่อแนบ Header X-Auth-Refreshed เมื่อสิทธิ์ถูกคำนวณใหม่
     protected static bool $authRefreshed = false;
 
     // ประเภท Client ของ Request ปัจจุบัน (ตั้งค่าครั้งเดียวใน before())
@@ -38,7 +43,7 @@ class TenantAuthFilter implements FilterInterface
         $this->isApi = $this->isApiRequest($request);
 
         if (! auth()->loggedIn()) {
-            return $this->deny(401, 'loginRequired', '/login');
+            return $this->deny(401, 'loginRequired', $this->loginPath);
         }
 
         $user    = auth()->user();
@@ -50,7 +55,7 @@ class TenantAuthFilter implements FilterInterface
 
         if ($uuid === '') {
             if (! $isAdmin) {
-                return $this->deny(400, 'tenantRequired', '/select-tenant', 'warning');
+                return $this->deny(400, 'tenantRequired', $this->selectTenantPath, 'warning');
             }
 
             // Admin ทำงานระดับ Platform เมื่อไม่ได้ระบุ Tenant
@@ -123,7 +128,7 @@ class TenantAuthFilter implements FilterInterface
             session()->remove('active_tenant_uuid');
         }
 
-        return $this->deny(404, 'tenantNotFound', '/select-tenant');
+        return $this->deny(404, 'tenantNotFound', $this->selectTenantPath);
     }
 
     /**
