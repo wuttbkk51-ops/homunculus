@@ -128,3 +128,4 @@ _modules/*
 
 # Project Ignore
 /writable/*.db  
+/public/assets/adminlte

@@ -15,9 +15,11 @@
         "codeigniter4/shield": "^1.4"
     },
     "require-dev": {
+        "almasaeed2010/adminlte": "^4.10",
         "fakerphp/faker": "^1.9",
         "mikey179/vfsstream": "^1.6",
-        "phpunit/phpunit": "^10.5.16"
+        "phpunit/phpunit": "^10.5.16",
+        "slowprog/composer-copy-file": "^0.3.3"
     },
     "autoload": {
         "psr-4": {
@@ -39,6 +41,25 @@
         "sort-packages": true
     },
     "scripts": {
+        "post-install-cmd": [
+            "SlowProg\\CopyFile\\ScriptHandler::copy"
+        ],
+        "post-update-cmd": [
+            "SlowProg\\CopyFile\\ScriptHandler::copy"
+        ],
+        "copy-assets": [
+            "SlowProg\\CopyFile\\ScriptHandler::copy"
+        ],
         "test": "phpunit --no-coverage"
+    },
+    "extra": {
+        "copy-file": {
+            "vendor/almasaeed2010/adminlte/dist/css/adminlte.min.css": "public/assets/adminlte/css/adminlte.min.css",
+            "vendor/almasaeed2010/adminlte/dist/css/adminlte.min.css.map": "public/assets/adminlte/css/adminlte.min.css.map",
+            "vendor/almasaeed2010/adminlte/dist/css/adminlte-colors.min.css": "public/assets/adminlte/css/adminlte-colors.min.css",
+            "vendor/almasaeed2010/adminlte/dist/css/adminlte-colors.min.css.map": "public/assets/adminlte/css/adminlte-colors.min.css.map",
+            "vendor/almasaeed2010/adminlte/dist/js/adminlte.min.js": "public/assets/adminlte/js/adminlte.min.js",
+            "vendor/almasaeed2010/adminlte/dist/js/adminlte.min.js.map": "public/assets/adminlte/js/adminlte.min.js.map"
+        }
     }
 }
