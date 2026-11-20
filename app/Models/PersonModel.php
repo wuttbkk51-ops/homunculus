@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 /**
- * Model จัดการข้อมูลตาราง people (Human Info แบบ Decoupled)
+ * Model จัดการข้อมูลตาราง people (Human Info แบบ Decoupled ประจำ Tenant)
  *
- * สืบทอดจาก TenantModel และเปิด includeGlobal เพื่อให้เข้าถึงข้อมูลบุคคลระดับ Global (tenant_id = 0) ได้
+ * สืบทอดจาก TenantModel เพื่อผูก auto-where tenant_id อัตโนมัติทุก action
  */
 class PersonModel extends TenantModel
 {
@@ -27,11 +27,6 @@ class PersonModel extends TenantModel
         'metadata',
     ];
 
-    /**
-     * อนุญาตให้มองเห็นและอ้างอิงข้อมูลบุคคลระดับ Global (tenant_id = 0)
-     */
-    protected bool $includeGlobal = true;
-
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
 
@@ -44,6 +39,7 @@ class PersonModel extends TenantModel
 
     // Validation
     protected $validationRules = [
+        'tenant_id'  => 'permit_empty|is_natural_no_zero',
         'first_name' => 'required|min_length[1]|max_length[100]',
         'last_name'  => 'required|min_length[1]|max_length[100]',
         'phone'      => 'permit_empty|max_length[30]',

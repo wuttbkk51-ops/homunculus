@@ -24,7 +24,6 @@ class CreatePeopleTable extends Migration
                 'type'       => 'INT',
                 'constraint' => 11,
                 'unsigned'   => true,
-                'default'    => 0,
             ],
             'first_name' => [
                 'type'       => 'VARCHAR',
@@ -70,6 +69,8 @@ class CreatePeopleTable extends Migration
         // Composite Index เอา tenant_id นำหน้าเสมอตาม Leftmost Prefix Rule
         $this->forge->addKey(['tenant_id', 'id']);
         $this->forge->addKey('tenant_id');
+
+        $this->forge->addForeignKey('tenant_id', 'tenants', 'id', 'CASCADE', 'CASCADE');
 
         $this->forge->createTable('people', true);
     }

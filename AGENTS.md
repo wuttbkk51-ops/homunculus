@@ -10,7 +10,7 @@
 - route check: `php spark routes` (เช็ค Filter ด้วย `php spark filter:check <GET|POST> <route>`)
 - clear cache: `php spark cache:clear`
 - test: `composer test`
-- generate code: `php spark make:<controller|model|migration|seeder>`
+- generate code: การสร้างไฟล์ Controller, Model, Migration, Seeder และอื่นๆ ให้สร้างผ่าน spark command (`php spark make:*` เช่น `php spark make:controller`, `php spark make:model`, `php spark make:migration`, `php spark make:seeder`) เป็นอันดับแรกเสมอ เพื่อโครงสร้างไฟล์ที่เป็นมาตรฐานของ CodeIgniter 4 แล้วจึงปรับแก้โค้ดให้ตรงตามกฎของโปรเจกต์ (เช่น เปลี่ยน Model ให้สืบทอดจาก `TenantModel`)
 
 ## ภาษาที่ใช้
 - เขียนอธิบาย ตอบ และ comment เป็นภาษาไทยเป็นหลัก
@@ -48,7 +48,6 @@
 15. ในช่วง dev ไม่ใช้ alias ให้ clean เสมอ
 16. ทุกครั้งที่เริ่มหรือเพิ่ม feature หรือ core ใดๆ ต้องแยก git branch เสมอ (หากไม่มั่นใจให้ถามผู้ใช้ก่อน)
 17. ความปลอดภัยของ Identifier: ข้อมูลใดก็ตามที่ส่งผ่าน Header หรือจุดเชื่อมต่อภายนอกที่ Client เข้าถึงได้ และปกติใช้ ID หรือตัวเลขที่เดาง่าย ให้เปลี่ยนไปใช้ UUID ที่ยากต่อการเดาแทน (ห้ามส่ง Auto-increment ID ออกไปข้างนอก เพื่อป้องกัน IDOR และ Information Leak) โดยภายใน DB ยังใช้ Integer ID เชื่อมโยงตามปกติ
-18. การสร้างไฟล์ Controller, Model, Migration, Seeder และอื่นๆ: ให้สร้างผ่าน spark command (`php spark make:*` เช่น `php spark make:controller`, `php spark make:model`, `php spark make:migration`, `php spark make:seeder`) เป็นอันดับแรกเสมอ เพื่อโครงสร้างไฟล์ที่เป็นมาตรฐานของ CodeIgniter 4 แล้วจึงปรับแก้โค้ดให้ตรงตามกฎของโปรเจกต์ (เช่น เปลี่ยน Model ให้สืบทอดจาก `TenantModel`)
 
 ## กติกาการเขียน comment
 1. เขียน comment เป็นภาษาไทยเป็นหลัก

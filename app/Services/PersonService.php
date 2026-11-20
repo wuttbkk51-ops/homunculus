@@ -26,6 +26,13 @@ class PersonService
      */
     public function createPerson(array $data): array
     {
+        if (empty($data['tenant_id'])) {
+            $tenantId = TenantModel::getCurrentTenantId();
+            if ($tenantId !== null) {
+                $data['tenant_id'] = $tenantId;
+            }
+        }
+
         $id = $this->personModel->insert($data, true);
         if (! $id) {
             $errors = implode(', ', $this->personModel->errors());
@@ -33,24 +40,6 @@ class PersonService
         }
 
         return $this->personModel->find($id);
-    }
-
-    /**
-     * สร้างข้อมูลบุคคลระดับ Global (tenant_id = 0)
-     */
-    public function createGlobalPerson(array $data): array
-    {
-        return TenantModel::withoutTenant(function () use ($data) {
-            $data['tenant_id'] = 0;
-            $id = $this->personModel->insert($data, true);
-
-            if (! $id) {
-                $errors = implode(', ', $this->personModel->errors());
-                throw new RuntimeException("สร้างข้อมูลบุคคลส่วนกลางไม่สำเร็จ: {$errors}");
-            }
-
-            return $this->personModel->find($id);
-        });
     }
 
     /**

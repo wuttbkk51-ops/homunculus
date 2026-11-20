@@ -13,7 +13,7 @@ description: กฎของ database, TenantModel, Multi-tenancy, Migration, Se
 - ทุก Model ที่สร้างใหม่**ต้องสืบทอดจาก `App\Models\TenantModel` เท่านั้น** ห้ามสืบทอดจาก `CodeIgniter\Model` โดยตรง
 - `TenantModel` ต้องผูก auto where `tenant_id` ให้ทุก action (find, insert, update, delete) อัตโนมัติ
 - ใช้ Cache (`cache()`) สำหรับ `tenant_id` ที่ใช้บ่อยหรือเรียกทุก request เพื่อลด query
-- ค่า `tenant_id = 0` ใช้เป็น Sentinel Value แทนข้อมูลระดับ Global (ระบบส่วนกลาง) สำหรับ table ที่รองรับข้อมูล Global ให้ใช้เพียง `INDEX(tenant_id)` ไม่ต้องผูก Foreign Key ไปยัง table `tenants`
+- ทุก table ที่ผูกกับ Tenant (เช่น `people`, `tenant_users`) ต้องผูก Foreign Key ไปยัง table `tenants.id ON DELETE CASCADE`
 - Composite Index (Key คู่) ใน Multi-tenancy ต้องเรียงโดยเอา `tenant_id` ไว้ข้างหน้าเสมอ เช่น `(tenant_id, id)` หรือ `(tenant_id, user_id)` เพื่อให้ query วิ่งผ่าน Index ได้เต็มประสิทธิภาพตาม Leftmost Prefix Rule
 
 ## Migration

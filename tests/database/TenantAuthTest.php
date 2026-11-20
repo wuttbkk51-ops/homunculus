@@ -157,18 +157,12 @@ final class TenantAuthTest extends CIUnitTestCase
     }
 
     /**
-     * ทดสอบ Multi-Tenancy Scoping และการเข้าถึงข้อมูล Global (tenant_id = 0) ในตาราง people
+     * ทดสอบ Multi-Tenancy Scoping ในตาราง people (แยกข้อมูลเด็ดขาดระหว่าง Tenant)
      */
-    public function testMultiTenancyScopingAndGlobalPeople(): void
+    public function testMultiTenancyScopingInPeople(): void
     {
         $tenantA = $this->tenantService->createTenant(['name' => 'Tenant A', 'slug' => 'tenant-a']);
         $tenantB = $this->tenantService->createTenant(['name' => 'Tenant B', 'slug' => 'tenant-b']);
-
-        // สร้างคนระดับ Global (tenant_id = 0)
-        $globalPerson = $this->personService->createGlobalPerson([
-            'first_name' => 'Central',
-            'last_name'  => 'System',
-        ]);
 
         // สร้างคนใน Tenant A
         TenantModel::setCurrentTenantId((int) $tenantA['id']);
@@ -184,22 +178,20 @@ final class TenantAuthTest extends CIUnitTestCase
             'last_name'  => 'Jones',
         ]);
 
-        // ตรวจสอบในมุมมองของ Tenant A (ต้องเห็น Alice และ Central, แต่ต้องไม่เห็น Bob)
+        // ตรวจสอบในมุมมองของ Tenant A (ต้องเห็น Alice และไม่เห็น Bob)
         TenantModel::setCurrentTenantId((int) $tenantA['id']);
         $peopleInA = $this->personService->listPeople();
         $idsInA    = array_column($peopleInA, 'id');
 
         $this->assertContains((int) $personA['id'], $idsInA);
-        $this->assertContains((int) $globalPerson['id'], $idsInA);
         $this->assertNotContains((int) $personB['id'], $idsInA);
 
-        // ตรวจสอบในมุมมองของ Tenant B (ต้องเห็น Bob และ Central, แต่ต้องไม่เห็น Alice)
+        // ตรวจสอบในมุมมองของ Tenant B (ต้องเห็น Bob และไม่เห็น Alice)
         TenantModel::setCurrentTenantId((int) $tenantB['id']);
         $peopleInB = $this->personService->listPeople();
         $idsInB    = array_column($peopleInB, 'id');
 
         $this->assertContains((int) $personB['id'], $idsInB);
-        $this->assertContains((int) $globalPerson['id'], $idsInB);
         $this->assertNotContains((int) $personA['id'], $idsInB);
     }
 
