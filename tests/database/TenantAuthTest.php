@@ -40,6 +40,8 @@ final class TenantAuthTest extends CIUnitTestCase
     {
         parent::setUp();
 
+        \Config\Services::resetSingle('incomingrequest');
+
         $this->tenantService = new TenantService();
         $this->authService   = new TenantAuthService();
         $this->personService = new PersonService();
@@ -237,7 +239,8 @@ final class TenantAuthTest extends CIUnitTestCase
 
         $filter   = new TenantAuthFilter();
         $request  = service('incomingrequest');
-        $request  = $request->setHeader('X-Tenant-ID', $tenant['uuid']);
+        $request  = $request->setHeader('X-Tenant-ID', $tenant['uuid'])
+                            ->setHeader('Accept', 'application/json');
 
         // Request 1: Cache ยังว่าง (Cache Miss) -> Filter ต้องโหลดสิทธิ์ลง Cache และส่ง Header แจ้ง Client
         $result = $filter->before($request);
@@ -286,7 +289,8 @@ final class TenantAuthTest extends CIUnitTestCase
 
         $filter  = new TenantAuthFilter();
         $request = service('incomingrequest');
-        $request = $request->setHeader('X-Tenant-ID', $tenant['uuid']);
+        $request = $request->setHeader('X-Tenant-ID', $tenant['uuid'])
+                           ->setHeader('Accept', 'application/json');
 
         // Admin ส่ง Header UUID เข้ามา -> Filter ต้องยินยอมให้ผ่านและตั้ง Active Tenant สำเร็จ
         $result = $filter->before($request);
@@ -315,7 +319,8 @@ final class TenantAuthTest extends CIUnitTestCase
         $filter  = new TenantAuthFilter();
         $request = service('incomingrequest');
         // ส่ง Integer ID ผ่าน Header
-        $request = $request->setHeader('X-Tenant-ID', (string) $tenant['id']);
+        $request = $request->setHeader('X-Tenant-ID', (string) $tenant['id'])
+                           ->setHeader('Accept', 'application/json');
 
         $response = $filter->before($request);
         $this->assertSame(404, $response->getStatusCode());
@@ -333,11 +338,67 @@ final class TenantAuthTest extends CIUnitTestCase
 
         $filter  = new TenantAuthFilter();
         $request = service('incomingrequest');
-        $request = $request->setHeader('X-Tenant-ID', $tenantB['uuid']);
+        $request = $request->setHeader('X-Tenant-ID', $tenantB['uuid'])
+                           ->setHeader('Accept', 'application/json');
 
         $response = $filter->before($request);
         $this->assertSame(404, $response->getStatusCode());
         // ยืนยันว่า session ยังไม่หลุด
         $this->assertTrue(auth()->loggedIn());
+    }
+
+    /**
+     * ทดสอบ Web Request: เมื่อยังไม่ได้เข้าสู่ระบบต้อง Redirect ไป /login
+     */
+    public function testWebClientWithoutLoginRedirectsToLogin(): void
+    {
+        if (auth()->loggedIn()) {
+            auth()->logout();
+        }
+
+        $filter   = new TenantAuthFilter();
+        $request  = \Config\Services::incomingrequest(null, false);
+        $response = $filter->before($request);
+
+        $this->assertInstanceOf(\CodeIgniter\HTTP\RedirectResponse::class, $response);
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertStringContainsString('/login', $response->getHeaderLine('Location'));
+    }
+
+    /**
+     * ทดสอบ Web Request: เมื่อเข้าสู่ระบบแล้วแต่ยังไม่มี Tenant ใน Session ต้อง Redirect ไป /select-tenant
+     */
+    public function testWebClientWithoutTenantRedirectsToSelectTenant(): void
+    {
+        $user = $this->createTestUser('web_user_no_tenant');
+        auth()->login($user);
+        session()->remove('active_tenant_uuid');
+
+        $filter   = new TenantAuthFilter();
+        $request  = \Config\Services::incomingrequest(null, false);
+        $response = $filter->before($request);
+
+        $this->assertInstanceOf(\CodeIgniter\HTTP\RedirectResponse::class, $response);
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertStringContainsString('/select-tenant', $response->getHeaderLine('Location'));
+    }
+
+    /**
+     * ทดสอบ Web Request: เมื่อ Tenant ใน Session ไม่ถูกต้อง ต้องล้าง Session และ Redirect ไป /select-tenant
+     */
+    public function testWebClientWithInvalidTenantCleansSessionAndRedirects(): void
+    {
+        $user = $this->createTestUser('web_user_invalid_tenant');
+        auth()->login($user);
+        session()->set('active_tenant_uuid', 'non-existent-tenant-uuid');
+
+        $filter   = new TenantAuthFilter();
+        $request  = \Config\Services::incomingrequest(null, false);
+        $response = $filter->before($request);
+
+        $this->assertInstanceOf(\CodeIgniter\HTTP\RedirectResponse::class, $response);
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertStringContainsString('/select-tenant', $response->getHeaderLine('Location'));
+        $this->assertEmpty(session('active_tenant_uuid'));
     }
 }
