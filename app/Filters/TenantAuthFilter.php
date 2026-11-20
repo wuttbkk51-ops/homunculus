@@ -19,6 +19,9 @@ class TenantAuthFilter implements FilterInterface
 {
     protected static bool $authRefreshed = false;
 
+    // ประเภท Client ของ Request ปัจจุบัน (ตั้งค่าครั้งเดียวใน before())
+    protected bool $isApi = false;
+
     public function __construct(
         protected TenantService $tenantService = new TenantService(),
         protected TenantAuthService $authService = new TenantAuthService(),
@@ -32,60 +35,46 @@ class TenantAuthFilter implements FilterInterface
             return $request;
         }
 
-        $isApi = $this->isApiRequest($request);
+        $this->isApi = $this->isApiRequest($request);
 
         if (! auth()->loggedIn()) {
-            return $this->fail(401, 'loginRequired', $isApi);
+            return $this->deny(401, 'loginRequired', '/login');
         }
 
-        $user = auth()->user();
+        $user    = auth()->user();
+        $isAdmin = $user->inGroup('admin');
 
-        // ดึง Tenant UUID ตามประเภท Client
-        $uuid = $isApi
-            ? $request->getHeaderLine('X-Tenant-ID')
-            : (string) session('active_tenant_uuid', '');
+        // API ใช้ Header อย่างเดียว / Web ใช้ Session ก่อน แล้ว fallback เป็น Header (สลับ Tenant)
+        $header = $request->getHeaderLine('X-Tenant-ID');
+        $uuid   = $this->isApi ? $header : ((string) session('active_tenant_uuid') ?: $header);
 
-        // กรณี Web Client มีการส่ง Header สลับ Tenant ให้ยอมรับได้
-        if (! $isApi && $uuid === '' && $request->hasHeader('X-Tenant-ID')) {
-            $uuid = $request->getHeaderLine('X-Tenant-ID');
-        }
+        if ($uuid === '') {
+            if (! $isAdmin) {
+                return $this->deny(400, 'tenantRequired', '/select-tenant', 'warning');
+            }
 
-        // Admin ทำงานระดับ Platform เมื่อไม่ได้ระบุ Tenant
-        if ($user->inGroup('admin') && $uuid === '') {
+            // Admin ทำงานระดับ Platform เมื่อไม่ได้ระบุ Tenant
             TenantModel::setCurrentTenantId(0);
 
             return $request;
         }
 
-        if ($uuid === '') {
-            return $this->fail(400, 'tenantRequired', $isApi);
-        }
-
         $tenant = $this->tenantService->findByUuid($uuid);
 
         if (! $tenant || $tenant['status'] !== 'active') {
-            if (! $isApi) {
-                session()->remove('active_tenant_uuid');
-            }
-
-            return $this->fail(404, 'tenantNotFound', $isApi);
+            return $this->notFound();
         }
 
         $tenantId = (int) $tenant['id'];
         TenantModel::setCurrentTenantId($tenantId);
 
-        // หากเป็น Web Client และ Tenant ถูกต้อง ให้ sync เก็บไว้ใน Session
-        if (! $isApi && session('active_tenant_uuid') !== $uuid) {
+        if (! $this->isApi) {
             session()->set('active_tenant_uuid', $uuid);
-        }
-
-        if ($user->inGroup('admin')) {
-            return $request;
         }
 
         $userId = (int) $user->id;
 
-        if ($this->authService->getUserAuthCache($tenantId, $userId) !== null) {
+        if ($isAdmin || $this->authService->getUserAuthCache($tenantId, $userId) !== null) {
             return $request;
         }
 
@@ -93,11 +82,7 @@ class TenantAuthFilter implements FilterInterface
 
         // 404 เหมือนกรณีไม่พบ Tenant เพื่อไม่เปิดเผยว่า Tenant มีอยู่จริง
         if (! $member || $member['status'] !== 'active') {
-            if (! $isApi) {
-                session()->remove('active_tenant_uuid');
-            }
-
-            return $this->fail(404, 'tenantNotFound', $isApi);
+            return $this->notFound();
         }
 
         $this->authService->setUserAuthCache($tenantId, $userId, [
@@ -113,11 +98,9 @@ class TenantAuthFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        if (static::$authRefreshed) {
-            $response->setHeader('X-Auth-Refreshed', 'true');
-        }
-
-        return $response;
+        return static::$authRefreshed
+            ? $response->setHeader('X-Auth-Refreshed', 'true')
+            : $response;
     }
 
     /**
@@ -132,26 +115,30 @@ class TenantAuthFilter implements FilterInterface
     }
 
     /**
-     * ส่ง Response ข้อผิดพลาดตามประเภท Client
+     * ไม่พบ Tenant หรือสมาชิกภาพไม่ถูกต้อง — ล้าง Session ป้องกัน Loop
      */
-    protected function fail(int $status, string $key, bool $isApi): ResponseInterface
+    protected function notFound(): ResponseInterface
+    {
+        if (! $this->isApi) {
+            session()->remove('active_tenant_uuid');
+        }
+
+        return $this->deny(404, 'tenantNotFound', '/select-tenant');
+    }
+
+    /**
+     * ตอบกลับ Error ตามประเภท Client: JSON สำหรับ API, Redirect + Flash สำหรับ Web
+     */
+    protected function deny(int $status, string $key, string $redirectTo, string $flash = 'error'): ResponseInterface
     {
         $message = lang("TenantAuth.{$key}");
 
-        if ($isApi) {
-            return service('response')
-                ->setStatusCode($status)
-                ->setJSON([
-                    'status'  => 'error',
-                    'code'    => $key,
-                    'message' => $message,
-                ]);
-        }
-
-        return match ($key) {
-            'loginRequired'  => redirect()->to('/login')->with('error', $message),
-            'tenantRequired' => redirect()->to('/select-tenant')->with('warning', $message),
-            default          => redirect()->to('/select-tenant')->with('error', $message),
-        };
+        return $this->isApi
+            ? service('response')->setStatusCode($status)->setJSON([
+                'status'  => 'error',
+                'code'    => $key,
+                'message' => $message,
+            ])
+            : redirect()->to($redirectTo)->with($flash, $message);
     }
 }

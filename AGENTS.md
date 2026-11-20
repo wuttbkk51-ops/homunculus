@@ -16,6 +16,11 @@
 - เขียนอธิบาย ตอบ และ comment เป็นภาษาไทยเป็นหลัก
 - ศัพท์เทคนิคคงเป็นภาษาอังกฤษตามที่เห็นในโค้ด ห้ามแปลเป็นสำนวนไทย และห้ามทับศัพท์เป็นอักษรไทย
   เช่น Controller, Service, Model, Filter, Migration, route, view, query, exception, validate, parameter
+- ระบบข้อความและการแสดงผล (exception message, validation message, response message, UI/flash message):
+  - ห้าม hardcode ข้อความในโค้ดโดยเด็ดขาด เช่น `throw new InvalidArgumentException('ไม่พบข้อมูลบุคคล');`
+  - ให้ใช้ระบบ Language ของ CodeIgniter 4 ผ่าน `lang('moduleName.key')` เสมอ
+  - รูปแบบการตั้งชื่อไฟล์: ใช้ชื่อโมดูล `moduleName` เดียวกันทั้งระบบ ไม่ว่าจะเรียกใช้จาก Controller, View, Service, Model หรือ Filter (เช่น `app/Language/{en,th}/Person.php`)
+  - ทุกครั้งที่มีการเพิ่มหรือแก้ไขข้อความ ต้องเขียนไฟล์ภาษาพร้อมกัน 2 ภาษาเสมอ ทั้งภาษาอังกฤษ (`app/Language/en/`) และภาษาไทย (`app/Language/th/`)
 
 ## ต้องอ่าน skill `ci4-design` ก่อนเริ่ม เมื่องานเป็นอย่างใดอย่างหนึ่งนี้
 - เริ่มโปรเจกต์ หรือเพิ่ม feature/module ใหม่
@@ -63,7 +68,7 @@
 ```php
 // ✅ order เกิน 50,000 ต้องให้ manager อนุมัติ ตามนโยบายบริษัท
 if ($order->total > 50000 && ! $user->inGroup('manager')) {
-    throw new ForbiddenException('ต้องให้ manager อนุมัติ');
+    throw new ForbiddenException(lang('Order.approvalRequired'));
 }
 
 // ❌ แปลศัพท์เทคนิค: "ตรวจสอบว่ายอดรวมของคำสั่งซื้อมากกว่าห้าหมื่น แล้วโยนข้อยกเว้น"
