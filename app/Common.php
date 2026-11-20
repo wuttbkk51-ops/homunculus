@@ -28,3 +28,23 @@ if (! function_exists('uuid_v4')) {
     }
 }
 
+if (! function_exists('uuid_v7')) {
+    /**
+     * สร้าง UUID v7 (เรียงตามเวลา) ใช้ตัวเดียวกันทั้งระบบตามกฎ 17
+     */
+    function uuid_v7(): string
+    {
+        // 48 บิตแรก = Unix time หน่วยมิลลิวินาที (6 byte), ที่เหลือสุ่มจาก CSPRNG
+        $ms   = (int) (microtime(true) * 1000);
+        $time = substr(pack('J', $ms), 2);
+        $rand = random_bytes(10);
+
+        // บิต version = 7 (ตำแหน่ง byte ที่ 7) และ variant = 10xx (ตำแหน่ง byte ที่ 9) ตาม RFC 9562
+        $rand[0] = chr((ord($rand[0]) & 0x0f) | 0x70);
+        $rand[2] = chr((ord($rand[2]) & 0x3f) | 0x80);
+
+        $hex = bin2hex($time . $rand);
+
+        return vsprintf('%s%s%s%s-%s%s-%s%s-%s%s-%s%s%s%s%s%s', str_split($hex, 2));
+    }
+}

@@ -213,7 +213,7 @@ class DevMockSeeder extends Seeder
         }
 
         $id = $tenantModel->insert([
-            'uuid'   => uuid_v4(),
+            'uuid'   => uuid_v7(),
             'name'   => $tenantData['name'],
             'slug'   => $tenantData['slug'],
             'status' => 'active',
