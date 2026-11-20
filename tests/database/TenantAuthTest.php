@@ -259,11 +259,12 @@ final class TenantAuthTest extends CIUnitTestCase
         $this->assertSame($request, $result2);
         $this->assertSame('', $response2->getHeaderLine('X-Auth-Refreshed'));
 
-        // Request 3: สมาชิกถูกระงับสิทธิ์ (Suspended/เตะออก) -> Cache โดนลบ -> Filter ต้องตัดสิทธิ์ตอบ 401
+        // Request 3: สมาชิกถูกระงับสิทธิ์ (Suspended/เตะออก) -> Cache โดนลบ -> Filter ต้องตัดสิทธิ์ตอบ 403 และคง session ไว้
         $this->tenantService->updateMemberStatus((int) $tenant['id'], $userId, 'suspended');
 
         $responseKicked = $filter->before($request);
-        $this->assertSame(401, $responseKicked->getStatusCode());
+        $this->assertSame(403, $responseKicked->getStatusCode());
+        $this->assertTrue(auth()->loggedIn());
     }
 
     /**
@@ -291,5 +292,52 @@ final class TenantAuthTest extends CIUnitTestCase
         $result = $filter->before($request);
         $this->assertSame($request, $result);
         $this->assertSame((int) $tenant['id'], TenantModel::getCurrentTenantId());
+
+        // Admin ไม่ส่ง Header UUID -> Filter ตั้งค่าระดับ Platform (ID: 0) ทันที
+        $emptyRequest = clone $request;
+        $emptyRequest->removeHeader('X-Tenant-ID');
+        $resultEmpty = $filter->before($emptyRequest);
+        $this->assertSame($emptyRequest, $resultEmpty);
+        $this->assertSame(0, TenantModel::getCurrentTenantId());
+    }
+
+    /**
+     * ทดสอบการปฏิเสธ Numeric ID จากภายนอกเพื่อป้องกันการสุ่มเดา ID (Enumeration)
+     */
+    public function testRejectNumericTenantIdentifier(): void
+    {
+        $user   = $this->createTestUser('numeric_tester');
+        $tenant = $this->tenantService->createTenant(['name' => 'Numeric Test', 'slug' => 'numeric-tnt']);
+        $this->tenantService->addMember((int) $tenant['id'], (int) $user->id, 'member');
+
+        auth()->login($user);
+
+        $filter  = new TenantAuthFilter();
+        $request = service('incomingrequest');
+        // ส่ง Integer ID ผ่าน Header
+        $request = $request->setHeader('X-Tenant-ID', (string) $tenant['id']);
+
+        $response = $filter->before($request);
+        $this->assertSame(404, $response->getStatusCode());
+    }
+
+    /**
+     * ทดสอบผู้ใช้ไม่ได้เป็นสมาชิกใน Tenant ต้องได้ 403 และไม่ถูก logout
+     */
+    public function testNonMemberTenantAccessReturns403WithoutLogout(): void
+    {
+        $userA   = $this->createTestUser('user_a');
+        $tenantB = $this->tenantService->createTenant(['name' => 'Tenant B', 'slug' => 'tenant-b-test']);
+
+        auth()->login($userA);
+
+        $filter  = new TenantAuthFilter();
+        $request = service('incomingrequest');
+        $request = $request->setHeader('X-Tenant-ID', $tenantB['uuid']);
+
+        $response = $filter->before($request);
+        $this->assertSame(403, $response->getStatusCode());
+        // ยืนยันว่า session ยังไม่หลุด
+        $this->assertTrue(auth()->loggedIn());
     }
 }
