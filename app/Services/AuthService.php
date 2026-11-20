@@ -11,7 +11,7 @@ use Config\AuthTenantRoles;
 /**
  * Service สำหรับจัดการสิทธิ์และ Auth Cache Flag ประจำ Tenant
  */
-class TenantAuthService
+class AuthService
 {
     protected TenantUserPermissionModel $permissionModel;
     protected AuthTenantRoles $roleConfig;

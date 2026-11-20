@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Database;
 
-use App\Filters\TenantAuthFilter;
+use App\Filters\AuthFilter;
 use App\Models\PersonModel;
 use App\Models\TenantModel;
 use App\Models\TenantModelBase;
 use App\Services\PersonService;
-use App\Services\TenantAuthService;
+use App\Services\AuthService;
 use App\Services\TenantService;
 use CodeIgniter\HTTP\Response;
 use CodeIgniter\Shield\Entities\User;
@@ -23,7 +23,7 @@ use Config\App;
  *
  * @internal
  */
-final class TenantAuthTest extends CIUnitTestCase
+final class AuthTest extends CIUnitTestCase
 {
     use DatabaseTestTrait;
 
@@ -33,7 +33,7 @@ final class TenantAuthTest extends CIUnitTestCase
     protected $namespace   = null;
 
     protected TenantService $tenantService;
-    protected TenantAuthService $authService;
+    protected AuthService $authService;
     protected PersonService $personService;
 
     protected function setUp(): void
@@ -43,7 +43,7 @@ final class TenantAuthTest extends CIUnitTestCase
         \Config\Services::resetSingle('incomingrequest');
 
         $this->tenantService = new TenantService();
-        $this->authService   = new TenantAuthService();
+        $this->authService   = new AuthService();
         $this->personService = new PersonService();
         cache()->clean();
         TenantModel::setCurrentTenantId(null);
@@ -224,9 +224,9 @@ final class TenantAuthTest extends CIUnitTestCase
     }
 
     /**
-     * ทดสอบ TenantAuthFilter: การทำงานร่วมกับ Shield, Cache Flag, และ Header X-Auth-Refreshed
+     * ทดสอบ AuthFilter: การทำงานร่วมกับ Shield, Cache Flag, และ Header X-Auth-Refreshed
      */
-    public function testTenantAuthFilterLifecycle(): void
+    public function testAuthFilterLifecycle(): void
     {
         $user   = $this->createTestUser('filter_user');
         $userId = (int) $user->id;
@@ -237,7 +237,7 @@ final class TenantAuthTest extends CIUnitTestCase
         // จำลองการ login ผ่าน Shield
         auth()->login($user);
 
-        $filter   = new TenantAuthFilter();
+        $filter   = new AuthFilter();
         $request  = service('incomingrequest');
         $request  = $request->setHeader('X-Tenant-ID', $tenant['uuid'])
                             ->setHeader('Accept', 'application/json');
@@ -287,7 +287,7 @@ final class TenantAuthTest extends CIUnitTestCase
         // หมายเหตุ: บัญชี Admin ไม่ได้ถูกเพิ่มใน tenant_users!
         $this->assertNull($this->tenantService->getMember((int) $tenant['id'], $adminId));
 
-        $filter  = new TenantAuthFilter();
+        $filter  = new AuthFilter();
         $request = service('incomingrequest');
         $request = $request->setHeader('X-Tenant-ID', $tenant['uuid'])
                            ->setHeader('Accept', 'application/json');
@@ -316,7 +316,7 @@ final class TenantAuthTest extends CIUnitTestCase
 
         auth()->login($user);
 
-        $filter  = new TenantAuthFilter();
+        $filter  = new AuthFilter();
         $request = service('incomingrequest');
         // ส่ง Integer ID ผ่าน Header
         $request = $request->setHeader('X-Tenant-ID', (string) $tenant['id'])
@@ -336,7 +336,7 @@ final class TenantAuthTest extends CIUnitTestCase
 
         auth()->login($userA);
 
-        $filter  = new TenantAuthFilter();
+        $filter  = new AuthFilter();
         $request = service('incomingrequest');
         $request = $request->setHeader('X-Tenant-ID', $tenantB['uuid'])
                            ->setHeader('Accept', 'application/json');
@@ -356,7 +356,7 @@ final class TenantAuthTest extends CIUnitTestCase
             auth()->logout();
         }
 
-        $filter   = new TenantAuthFilter();
+        $filter   = new AuthFilter();
         $request  = \Config\Services::incomingrequest(null, false);
         $response = $filter->before($request);
 
@@ -374,7 +374,7 @@ final class TenantAuthTest extends CIUnitTestCase
         auth()->login($user);
         session()->remove('active_tenant_uuid');
 
-        $filter   = new TenantAuthFilter();
+        $filter   = new AuthFilter();
         $request  = \Config\Services::incomingrequest(null, false);
         $response = $filter->before($request);
 
@@ -392,7 +392,7 @@ final class TenantAuthTest extends CIUnitTestCase
         auth()->login($user);
         session()->set('active_tenant_uuid', 'non-existent-tenant-uuid');
 
-        $filter   = new TenantAuthFilter();
+        $filter   = new AuthFilter();
         $request  = \Config\Services::incomingrequest(null, false);
         $response = $filter->before($request);
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filters;
 
 use App\Models\TenantModel;
-use App\Services\TenantAuthService;
+use App\Services\AuthService;
 use App\Services\TenantService;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\IncomingRequest;
@@ -15,7 +15,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 /**
  * Filter ตรวจสอบการยืนยันตัวตน, กำหนดบริบท Tenant ผ่าน UUID, ตรวจสอบ Cache Flag และแจ้งเตือน Client เมื่อสิทธิ์เปลี่ยน
  */
-class TenantAuthFilter implements FilterInterface
+class AuthFilter implements FilterInterface
 {
     // Path สำหรับ Redirect ในฝั่ง Web เมื่อไม่ผ่านการตรวจสอบ
     protected string $loginPath = '/login';
@@ -29,7 +29,7 @@ class TenantAuthFilter implements FilterInterface
 
     public function __construct(
         protected TenantService $tenantService = new TenantService(),
-        protected TenantAuthService $authService = new TenantAuthService(),
+        protected AuthService $authService = new AuthService(),
     ) {}
 
     public function before(RequestInterface $request, $arguments = null)

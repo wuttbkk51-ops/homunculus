@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Filters\TenantAuthFilter;
+use App\Filters\AuthFilter;
 use CodeIgniter\Filters\Filters;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\DatabaseTestTrait;
@@ -12,11 +12,11 @@ use CodeIgniter\Test\FeatureTestTrait;
 use Config\Filters as FiltersConfig;
 
 /**
- * ทดสอบการทำงานของ TenantAuthFilter ในระดับ Global Filter และการยกเว้น public routes
+ * ทดสอบการทำงานของ AuthFilter ในระดับ Global Filter และการยกเว้น public routes
  *
  * @internal
  */
-final class TenantAuthGlobalFilterTest extends CIUnitTestCase
+final class AuthGlobalFilterTest extends CIUnitTestCase
 {
     use DatabaseTestTrait;
     use FeatureTestTrait;
@@ -38,9 +38,9 @@ final class TenantAuthGlobalFilterTest extends CIUnitTestCase
     }
 
     /**
-     * ทดสอบว่า route สาธารณะ (public routes) ได้รับการยกเว้นจาก TenantAuthFilter
+     * ทดสอบว่า route สาธารณะ (public routes) ได้รับการยกเว้นจาก AuthFilter
      */
-    public function testPublicRoutesAreExcludedFromTenantAuthFilter(): void
+    public function testPublicRoutesAreExcludedFromAuthFilter(): void
     {
         $config  = config(FiltersConfig::class);
         $request = service('incomingrequest');
@@ -76,9 +76,9 @@ final class TenantAuthGlobalFilterTest extends CIUnitTestCase
     }
 
     /**
-     * ทดสอบว่า route ที่ไม่ได้ยกเว้น (protected routes) จะถูกตรวจด้วย TenantAuthFilter เสมอ
+     * ทดสอบว่า route ที่ไม่ได้ยกเว้น (protected routes) จะถูกตรวจด้วย AuthFilter เสมอ
      */
-    public function testProtectedRoutesIncludeTenantAuthFilter(): void
+    public function testProtectedRoutesIncludeAuthFilter(): void
     {
         $config  = config(FiltersConfig::class);
         $request = service('incomingrequest');

@@ -2,7 +2,7 @@
  * AuthSync Helper
  *
  * ระบบซิงค์สถานะการเปลี่ยนแปลงสิทธิ์ (Auth/Permissions) ข้ามแท็บเบราว์เซอร์ผ่าน BroadcastChannel API
- * ทำงานร่วมกับ Response Header "X-Auth-Refreshed" จาก TenantAuthFilter (App\Filters\TenantAuthFilter)
+ * ทำงานร่วมกับ Response Header "X-Auth-Refreshed" จาก AuthFilter (App\Filters\AuthFilter)
  *
  * @example
  * // 1. โหลดสคริปต์ใน HTML View
@@ -23,7 +23,7 @@
     // ชื่อ Channel สำหรับสื่อสารข้ามแท็บภายใต้ Origin เดียวกัน
     const CHANNEL_NAME = 'auth_sync';
 
-    // Header ที่ส่งมาจาก TenantAuthFilter เมื่อ Cache สิทธิ์ถูกคำนวณใหม่
+    // Header ที่ส่งมาจาก AuthFilter เมื่อ Cache สิทธิ์ถูกคำนวณใหม่
     const REFRESH_HEADER = 'X-Auth-Refreshed';
 
     // การตั้งค่าเริ่มต้น
