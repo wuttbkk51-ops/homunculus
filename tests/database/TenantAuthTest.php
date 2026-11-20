@@ -259,11 +259,11 @@ final class TenantAuthTest extends CIUnitTestCase
         $this->assertSame($request, $result2);
         $this->assertSame('', $response2->getHeaderLine('X-Auth-Refreshed'));
 
-        // Request 3: สมาชิกถูกระงับสิทธิ์ (Suspended/เตะออก) -> Cache โดนลบ -> Filter ต้องตัดสิทธิ์ตอบ 403 และคง session ไว้
+        // Request 3: สมาชิกถูกระงับสิทธิ์ (Suspended/เตะออก) -> Cache โดนลบ -> Filter ต้องตอบ 404 เพื่อไม่เปิดเผยว่า Tenant มีอยู่จริง และคง session ไว้
         $this->tenantService->updateMemberStatus((int) $tenant['id'], $userId, 'suspended');
 
         $responseKicked = $filter->before($request);
-        $this->assertSame(403, $responseKicked->getStatusCode());
+        $this->assertSame(404, $responseKicked->getStatusCode());
         $this->assertTrue(auth()->loggedIn());
     }
 
@@ -322,9 +322,9 @@ final class TenantAuthTest extends CIUnitTestCase
     }
 
     /**
-     * ทดสอบผู้ใช้ไม่ได้เป็นสมาชิกใน Tenant ต้องได้ 403 และไม่ถูก logout
+     * ทดสอบผู้ใช้ไม่ได้เป็นสมาชิกใน Tenant ต้องได้ 404 เพื่อป้องกันการสุ่มเดาว่ามี Tenant หรือไม่ และไม่ถูก logout
      */
-    public function testNonMemberTenantAccessReturns403WithoutLogout(): void
+    public function testNonMemberTenantAccessReturns404WithoutLogout(): void
     {
         $userA   = $this->createTestUser('user_a');
         $tenantB = $this->tenantService->createTenant(['name' => 'Tenant B', 'slug' => 'tenant-b-test']);
@@ -336,7 +336,7 @@ final class TenantAuthTest extends CIUnitTestCase
         $request = $request->setHeader('X-Tenant-ID', $tenantB['uuid']);
 
         $response = $filter->before($request);
-        $this->assertSame(403, $response->getStatusCode());
+        $this->assertSame(404, $response->getStatusCode());
         // ยืนยันว่า session ยังไม่หลุด
         $this->assertTrue(auth()->loggedIn());
     }
