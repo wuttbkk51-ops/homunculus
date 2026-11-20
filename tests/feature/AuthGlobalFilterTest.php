@@ -63,14 +63,14 @@ final class AuthGlobalFilterTest extends CIUnitTestCase
             $activeFilters = $filters->getFilters();
 
             $this->assertNotContains(
-                'tenant_auth',
+                'auth',
                 $activeFilters['before'],
-                "Route '{$path}' ไม่ควรติด tenant_auth ใน before",
+                "Route '{$path}' ไม่ควรติด auth ใน before",
             );
             $this->assertNotContains(
-                'tenant_auth',
+                'auth',
                 $activeFilters['after'],
-                "Route '{$path}' ไม่ควรติด tenant_auth ใน after",
+                "Route '{$path}' ไม่ควรติด auth ใน after",
             );
         }
     }
@@ -96,14 +96,14 @@ final class AuthGlobalFilterTest extends CIUnitTestCase
             $activeFilters = $filters->getFilters();
 
             $this->assertContains(
-                'tenant_auth',
+                'auth',
                 $activeFilters['before'],
-                "Route '{$path}' ต้องมี tenant_auth ใน before",
+                "Route '{$path}' ต้องมี auth ใน before",
             );
             $this->assertContains(
-                'tenant_auth',
+                'auth',
                 $activeFilters['after'],
-                "Route '{$path}' ต้องมี tenant_auth ใน after",
+                "Route '{$path}' ต้องมี auth ใน after",
             );
         }
     }
