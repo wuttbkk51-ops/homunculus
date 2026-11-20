@@ -17,9 +17,6 @@ use CodeIgniter\HTTP\ResponseInterface;
  */
 class TenantAuthFilter implements FilterInterface
 {
-    /**
-     * Flag ส่งต่อให้ after() แนบ Header X-Auth-Refreshed
-     */
     protected static bool $authRefreshed = false;
 
     public function before(RequestInterface $request, $arguments = null)
@@ -30,9 +27,8 @@ class TenantAuthFilter implements FilterInterface
             return $request;
         }
 
-        // ตรวจสอบสถานะการยืนยันตัวตนผ่าน Shield
         if (! auth()->loggedIn()) {
-            return $this->fail(401, 'กรุณาเข้าสู่ระบบก่อนดำเนินการ');
+            return $this->fail(401, 'loginRequired');
         }
 
         $user = auth()->user();
@@ -41,7 +37,7 @@ class TenantAuthFilter implements FilterInterface
             $uuid = (string) session('active_tenant_uuid', '');
         }
 
-        // Admin ทำงานระดับ Platform เมื่อไม่ได้ระบุ Tenant มาใน request
+        // Admin ทำงานระดับ Platform เมื่อไม่ได้ระบุ Tenant
         if ($user->inGroup('admin') && $uuid === '') {
             TenantModel::setCurrentTenantId(0);
 
@@ -49,45 +45,40 @@ class TenantAuthFilter implements FilterInterface
         }
 
         if ($uuid === '') {
-            return $this->fail(400, 'กรุณาระบุ Tenant UUID ผ่าน Header X-Tenant-ID');
+            return $this->fail(400, 'tenantRequired');
         }
 
-        // ค้นหาเฉพาะ UUID เพื่อป้องกันการสุ่มเดา Integer ID ตามนโยบายความปลอดภัย
         $tenantService = new TenantService();
         $tenant        = $tenantService->findByUuid($uuid);
 
         if (! $tenant || $tenant['status'] !== 'active') {
-            return $this->fail(404, 'ไม่พบ Tenant ที่ระบุ หรือ Tenant ไม่พร้อมใช้งาน');
+            return $this->fail(404, 'tenantNotFound');
         }
 
         $tenantId = (int) $tenant['id'];
         TenantModel::setCurrentTenantId($tenantId);
 
-        // Admin ได้รับสิทธิ์ข้ามการตรวจสอบสมาชิกภาพภายใน Tenant
         if ($user->inGroup('admin')) {
             return $request;
         }
 
         $userId      = (int) $user->id;
         $authService = new TenantAuthService();
-        $cachedAuth  = $authService->getUserAuthCache($tenantId, $userId);
 
-        if ($cachedAuth !== null) {
+        if ($authService->getUserAuthCache($tenantId, $userId) !== null) {
             return $request;
         }
 
-        // Cache Miss: ตรวจสอบสถานะสมาชิกภาพจาก database
         $member = $tenantService->getMember($tenantId, $userId);
 
-        // ตอบ 403 และไม่ logout เพื่อรักษา session เดิมสำหรับ Tenant อื่นที่ผู้ใช้มีสิทธิ์
+        // 404 เหมือนกรณีไม่พบ Tenant เพื่อไม่เปิดเผยว่า Tenant มีอยู่จริง
         if (! $member || $member['status'] !== 'active') {
-            return $this->fail(403, 'คุณไม่มีสิทธิ์เข้าถึง Tenant นี้ หรือบัญชีถูกระงับการใช้งาน');
+            return $this->fail(404, 'tenantNotFound');
         }
 
-        $permissions = $authService->resolveUserPermissions($tenantId, $userId, $member['role']);
         $authService->setUserAuthCache($tenantId, $userId, [
             'role'         => $member['role'],
-            'permissions'  => $permissions,
+            'permissions'  => $authService->resolveUserPermissions($tenantId, $userId, $member['role']),
             'refreshed_at' => date('Y-m-d H:i:s'),
         ]);
 
@@ -105,16 +96,14 @@ class TenantAuthFilter implements FilterInterface
         return $response;
     }
 
-    /**
-     * Helper ส่ง JSON error response ในรูปแบบมาตรฐาน
-     */
-    protected function fail(int $status, string $message): ResponseInterface
+    protected function fail(int $status, string $key): ResponseInterface
     {
         return service('response')
             ->setStatusCode($status)
             ->setJSON([
                 'status'  => 'error',
-                'message' => $message,
+                'code'    => $key,
+                'message' => lang("TenantAuth.{$key}"),
             ]);
     }
 }
