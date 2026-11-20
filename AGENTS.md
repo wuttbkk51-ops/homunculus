@@ -1,13 +1,16 @@
 # AGENTS.md
 
 ## Stack
-- CodeIgniter 4.x, PHP 8.2+, MySQL (production), SQLite3 (dev on local)
+- CodeIgniter 4.7+, PHP 8.2+, MySQL (production), SQLite3 (dev on local)
 - Auth: CodeIgniter Shield
 
 ## คำสั่งหลัก (ปรับตามโปรเจกต์จริง)
 - dev server: `php spark serve`
-- migrate: `php spark migrate`
+- migrate: `php spark migrate` (เช็คสถานะด้วย `php spark migrate:status`)
+- route check: `php spark routes` (เช็ค Filter ด้วย `php spark filter:check <GET|POST> <route>`)
+- clear cache: `php spark cache:clear`
 - test: `composer test`
+- generate code: `php spark make:<controller|model|migration|seeder>`
 
 ## ภาษาที่ใช้
 - เขียนอธิบาย ตอบ และ comment เป็นภาษาไทยเป็นหลัก
@@ -27,17 +30,25 @@
 1. Controller ทำแค่ 3 อย่าง: รับ request → เรียก Service → ส่ง response
    ห้ามมี query, การคำนวณ หรือ business logic ใน Controller
 2. Business logic อยู่ใน `app/Services/` (1 Service = 1 หน้าที่)
-3. Query อยู่ใน `app/Models/` เท่านั้น ห้ามมีใน Controller หรือ view
-4. Service ไม่อ่าน `$this->request` หรือ `$_POST` โดยตรง รับค่าผ่าน parameter
-5. Fail fast: เจอข้อผิดพลาดให้ throw exception พร้อม message ที่บอกสาเหตุ
+3. Multi-tenancy: ทุก table ต้องมี `tenant_id` และ Model ที่สร้างใหม่ต้องสืบทอดจาก `TenantModel` เท่านั้น
+4. Query อยู่ใน `app/Models/` เท่านั้น ห้ามมีใน Controller หรือ view
+5. Service ไม่อ่าน `$this->request` หรือ `$_POST` โดยตรง รับค่าผ่าน parameter
+6. เขียนโค้ดตามแนวทาง Ponytail: Clean, Minimal, Reuse, Modular
+   แก้ปัญหาด้วยโค้ดที่สั้นและตรงจุดที่สุด ห้ามสร้าง abstraction หรือเขียนโค้ดเผื่ออนาคตที่ยังไม่จำเป็น (YAGNI)
+7. ใช้ Cache (`cache()`) สำหรับข้อมูลที่ถูกเรียกบ่อยหรือทุก request เช่น `tenant_id`, user status และ user permissions
+8. Fail fast: เจอข้อผิดพลาดให้ throw exception พร้อม message ที่บอกสาเหตุ
    ห้าม `catch` เปล่าๆ แล้วไม่ทำอะไร (ห้าม swallow exception)
-6. โค้ดและ Migration ต้องรันได้ทั้ง MySQL และ SQLite: ใช้ Query Builder และ Forge ของ CI4
+9. โค้ดและ Migration ต้องรันได้ทั้ง MySQL และ SQLite: ใช้ Query Builder และ Forge ของ CI4
    ห้ามใช้ SQL เฉพาะ DB
-7. ห้ามแก้ `system/`, `vendor/`, `writable/`
-8. ห้ามใส่ secret ในโค้ด ใช้ `.env` (commit เฉพาะ `.env.example`)
-9. ทุก feature ใหม่ต้องมี test อย่างน้อย 1 ตัว และรันผ่านก่อนจบงาน
-10. ทำเฉพาะที่ขอ ห้าม refactor ไฟล์ที่ไม่เกี่ยวข้อง
-11. ไม่แน่ใจให้ถามก่อนเดา
+10. ห้ามแก้ `system/`, `vendor/`, `writable/`
+11. ห้ามใส่ secret ในโค้ด ใช้ `.env` (commit เฉพาะ `.env.example`)
+12. ทุก feature ใหม่ต้องมี test อย่างน้อย 1 ตัว, รันผ่านก่อนส่งงาน และ commit หลังจาก test ผ่านแล้วเท่านั้น
+13. ทำเฉพาะที่ขอ ห้าม refactor ไฟล์ที่ไม่เกี่ยวข้อง
+14. ไม่แน่ใจให้ถามก่อนเดา
+15. ในช่วง dev ไม่ใช้ alias ให้ clean เสมอ
+16. ทุกครั้งที่เริ่มหรือเพิ่ม feature หรือ core ใดๆ ต้องแยก git branch เสมอ (หากไม่มั่นใจให้ถามผู้ใช้ก่อน)
+17. ความปลอดภัยของ Identifier: ข้อมูลใดก็ตามที่ส่งผ่าน Header หรือจุดเชื่อมต่อภายนอกที่ Client เข้าถึงได้ และปกติใช้ ID หรือตัวเลขที่เดาง่าย ให้เปลี่ยนไปใช้ UUID ที่ยากต่อการเดาแทน (ห้ามส่ง Auto-increment ID ออกไปข้างนอก เพื่อป้องกัน IDOR และ Information Leak) โดยภายใน DB ยังใช้ Integer ID เชื่อมโยงตามปกติ
+18. การสร้างไฟล์ Controller, Model, Migration, Seeder และอื่นๆ: ให้สร้างผ่าน spark command (`php spark make:*` เช่น `php spark make:controller`, `php spark make:model`, `php spark make:migration`, `php spark make:seeder`) เป็นอันดับแรกเสมอ เพื่อโครงสร้างไฟล์ที่เป็นมาตรฐานของ CodeIgniter 4 แล้วจึงปรับแก้โค้ดให้ตรงตามกฎของโปรเจกต์ (เช่น เปลี่ยน Model ให้สืบทอดจาก `TenantModel`)
 
 ## กติกาการเขียน comment
 1. เขียน comment เป็นภาษาไทยเป็นหลัก
@@ -65,11 +76,11 @@ if ($order->total > 50000 && ! $user->inGroup('manager')) {
 
 | งานที่ทำ | อ่านไฟล์นี้ |
 |---|---|
-| database, Models, Migrations, Seeds | `.agents/rules/data-model.md` |
-| login, session, password, permission, filter, CodeIgniter Shield | `.agents/rules/auth.md` |
+| database, Models, TenantModel, Migrations, Seeds, Bootstrap | `.agents/rules/data-model.md` |
+| login, session, password, permission, Filter, Cache ข้อมูลสิทธิ์ | `.agents/rules/auth.md` |
 | ux-ui, html, css, js, views | `.agents/rules/ui-role.md` |
 | เขียนหรือรัน test | `.agents/rules/testing.md` |
-| เพิ่มหรือแก้ route, API endpoint, request validation | `.agents/rules/routing-api.md` |
+| route, API endpoint, Controller, routing admin/dashboard | `.agents/rules/routing-api.md` |
 
 ## เมื่อเพิ่มกฎใหม่
 - กฎที่ใช้ทุกงาน → ใส่ในไฟล์นี้ (ต้องสั้น)

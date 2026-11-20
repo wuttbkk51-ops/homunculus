@@ -14,4 +14,4 @@ description: กฎการเขียนและรัน test ด้วย 
 - ตั้งชื่อ test ให้บอกพฤติกรรม เช่น `test_approve_fails_when_total_exceeds_limit`
 - แก้ bug ต้องเขียน test ที่ fail ก่อนแก้ แล้วต้อง pass หลังแก้
 - test รันบน SQLite ได้ แต่ถ้าแก้ Migration หรือ query ที่ซับซ้อน ให้ลองรันบน MySQL ด้วยก่อน merge
-- ก่อนจบงานต้องรัน `composer test` และรายงานผลตามจริง ห้ามบอกว่า pass ถ้ายังไม่ได้รัน
+- ก่อนจบงานต้องรัน `composer test` และรายงานผลตามจริง ห้ามบอกว่า pass ถ้ายังไม่ได้รัน โดย commit โค้ดหลังจาก test ผ่านเรียบร้อยแล้วเท่านั้น

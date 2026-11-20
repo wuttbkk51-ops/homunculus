@@ -10,6 +10,7 @@ description: กฎของ view, layout, html, css, js และการแ�
 
 ## view
 - ใช้ layout หลักผ่าน `extend()` และ `section()` ไม่ copy โครง html ซ้ำ
+- view ของ `Controllers/Admin/*` จัดเก็บโดย**ไม่มี prefix `admin/`** เช่น `app/Views/users/` แทน `app/Views/admin/users/`
 - escape output ด้วย `esc()` ทุกครั้ง
 - ห้ามมี query หรือ business logic ใน view รับ data ที่เตรียมแล้วจาก Controller เท่านั้น
 - ฟอร์มที่ส่งด้วย POST ต้องมี `csrf_field()`
