@@ -6,6 +6,15 @@ class Home extends BaseController
 {
     public function index(): string
     {
-        return view('welcome_message');
+        return view('starter', [
+            'title' => lang('App.starterPage'),
+        ]);
+    }
+
+    public function starter(): string
+    {
+        return view('starter', [
+            'title' => lang('App.starterPage'),
+        ]);
     }
 }
