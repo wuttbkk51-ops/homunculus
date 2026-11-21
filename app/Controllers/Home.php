@@ -18,11 +18,4 @@ class Home extends BaseController
             'title' => lang('Home.title'),
         ]);
     }
-
-    public function starter(): string
-    {
-        return view('starter', [
-            'title' => lang('App.starterPage'),
-        ]);
-    }
 }

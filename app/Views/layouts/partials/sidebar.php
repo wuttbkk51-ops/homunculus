@@ -36,12 +36,6 @@ $uri = service('uri')->getPath();
                         <p><?= esc(lang('App.settings')) ?></p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="<?= site_url('starter') ?>" class="nav-link <?= str_starts_with($uri, 'starter') ? 'active' : '' ?>">
-                        <i class="nav-icon bi bi-file-earmark"></i>
-                        <p><?= esc(lang('App.starterPage')) ?></p>
-                    </a>
-                </li>
             </ul>
         </nav>
     </div>

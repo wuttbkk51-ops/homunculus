@@ -1,15 +1,20 @@
 <?php
 /**
+ * Example Template for Master Layout
+ *
+ * ไฟล์ตัวอย่างการใช้งาน Master Layout (layouts/master)
+ * ใช้เป็นแนวทางเริ่มต้นสำหรับการสร้างหน้าจอใหม่ในระบบ
+ *
  * @var string|null $title
  * @var array<int, array{title: string, url?: string}>|null $breadcrumbs
  */
-$title ??= lang('App.starterPage');
+$title ??= 'Example Page';
 ?>
 <?= $this->extend('layouts/master') ?>
 
 <?= $this->section('contentStyles') ?>
 <style>
-    .starter-page-badge {
+    .example-page-badge {
         font-size: 0.85rem;
     }
 </style>
@@ -18,10 +23,13 @@ $title ??= lang('App.starterPage');
 <?= $this->section('content') ?>
 <div class="row">
     <div class="col-12">
-        <!-- Starter Card -->
+        <!-- Example Card -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><?= esc(lang('App.starterCard')) ?></h3>
+                <h3 class="card-title d-flex align-items-center gap-2">
+                    <span>Example Card</span>
+                    <span class="badge text-bg-primary example-page-badge">Example</span>
+                </h3>
 
                 <div class="card-tools">
                     <button
@@ -44,10 +52,10 @@ $title ??= lang('App.starterPage');
                 </div>
             </div>
             <div class="card-body">
-                <?= esc(lang('App.starterText')) ?>
+                Start creating your amazing application!
             </div>
             <div class="card-footer text-secondary">
-                <?= esc(lang('App.cardFooter')) ?>
+                The footer of the card
             </div>
         </div>
     </div>
@@ -56,6 +64,6 @@ $title ??= lang('App.starterPage');
 
 <?= $this->section('contentScript') ?>
 <script>
-    // Page specific script for starter page
+    // Page specific script for example page
 </script>
 <?= $this->endSection() ?>

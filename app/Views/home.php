@@ -76,9 +76,6 @@
                     <li class="nav-item">
                         <a class="nav-link active fw-medium" href="<?= site_url('/') ?>"><?= esc(lang('Home.title')) ?></a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-body-secondary" href="<?= site_url('starter') ?>"><?= esc(lang('App.starterPage')) ?></a>
-                    </li>
                 </ul>
                 <div class="d-flex align-items-center gap-2">
                     <?php if (auth()->loggedIn()): ?>
@@ -116,9 +113,6 @@
                     <div class="d-flex flex-wrap justify-content-center gap-3">
                         <a href="<?= site_url('admin') ?>" class="btn btn-primary btn-lg px-4 shadow-sm">
                             <i class="bi bi-speedometer2 me-2"></i><?= esc(lang('Home.enterAdmin')) ?>
-                        </a>
-                        <a href="<?= site_url('starter') ?>" class="btn btn-outline-secondary btn-lg px-4">
-                            <i class="bi bi-file-earmark-code me-2"></i><?= esc(lang('App.starterPage')) ?>
                         </a>
                     </div>
                 </div>

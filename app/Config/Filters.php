@@ -79,7 +79,6 @@ class Filters extends BaseFilters
             'auth' => [
                 'except' => [
                     '/',
-                    'starter*',
                     'login*',
                     'register*',
                     'auth/*',
@@ -93,7 +92,6 @@ class Filters extends BaseFilters
             'auth' => [
                 'except' => [
                     '/',
-                    'starter*',
                     'login*',
                     'register*',
                     'auth/*',
