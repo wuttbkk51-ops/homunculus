@@ -29,19 +29,44 @@ final class DashboardAndPagesViewTest extends CIUnitTestCase
     }
 
     /**
-     * ทดสอบว่า route '/' เรนเดอร์ Small Box Widgets และ Overview ของ Dashboard
+     * ทดสอบว่า route '/' แสดงผลหน้า Home สำเร็จสำหรับ Guest (ยังไม่ login)
      */
-    public function testIndexRendersDashboardWidgetsAndOverview(): void
+    public function testIndexRendersHomePageForGuest(): void
     {
+        if (auth()->loggedIn()) {
+            auth()->logout();
+        }
+
         $result = $this->get('/');
 
         $result->assertOK();
-        $result->assertSee('small-box text-bg-primary');
-        $result->assertSee('small-box text-bg-success');
-        $result->assertSee('small-box text-bg-warning');
-        $result->assertSee('small-box text-bg-danger');
-        $result->assertSee(esc(lang('Dashboard.newOrders')));
-        $result->assertSee(esc(lang('Dashboard.recentActivity')));
+        $result->assertSee(esc(lang('App.appName')));
+        $result->assertSee(esc(lang('Home.adminPortal')));
+        $result->assertSee(site_url('admin'));
+    }
+
+    /**
+     * ทดสอบว่า route '/' จะ redirect ไปยัง '/admin' สำหรับผู้ใช้ที่ login แล้ว
+     */
+    public function testIndexRedirectsToAdminForAuthenticatedUser(): void
+    {
+        $userModel = new \CodeIgniter\Shield\Models\UserModel();
+        $unique    = uniqid();
+        $user      = new \CodeIgniter\Shield\Entities\User([
+            'username' => "home_user_{$unique}",
+            'email'    => "home_user_{$unique}@example.com",
+            'password' => 'secret_123',
+            'active'   => 1,
+        ]);
+        $userId    = $userModel->insert($user, true);
+        $savedUser = $userModel->find($userId);
+
+        auth()->login($savedUser);
+
+        $result = $this->get('/');
+        $result->assertRedirectTo('/admin');
+
+        auth()->logout();
     }
 
     /**
@@ -58,6 +83,7 @@ final class DashboardAndPagesViewTest extends CIUnitTestCase
         $this->assertStringContainsString('small-box text-bg-warning', $html);
         $this->assertStringContainsString('small-box text-bg-danger', $html);
         $this->assertStringContainsString('Enterprise License', $html);
+        $this->assertStringContainsString('theme-luxury.css', $html);
     }
 
     /**
@@ -100,6 +126,9 @@ final class DashboardAndPagesViewTest extends CIUnitTestCase
      */
     public function testProtectedRoutesRedirectToLogin(): void
     {
+        $admin = $this->get('admin');
+        $admin->assertRedirectTo('/login');
+
         $dashboard = $this->get('dashboard');
         $dashboard->assertRedirectTo('/login');
 

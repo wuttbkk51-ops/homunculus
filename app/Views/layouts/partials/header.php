@@ -64,6 +64,9 @@ if ($rawSectionTitle !== '') {
 <link rel="stylesheet" href="<?= base_url('assets/adminlte/css/adminlte.min.css') ?>">
 <link rel="stylesheet" href="<?= base_url('assets/adminlte/css/adminlte-colors.min.css') ?>">
 
+<!-- Custom Sharp & Luxury Theme (Zero Border-Radius & Muted Architectural Palette) -->
+<link rel="stylesheet" href="<?= base_url('assets/css/theme-luxury.css') ?>">
+
 <style>
     body {
         font-family: 'Noto Sans Thai', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

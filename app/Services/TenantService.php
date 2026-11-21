@@ -30,7 +30,7 @@ class TenantService
     public function createTenant(array $data): array
     {
         if (empty($data['uuid'])) {
-            $data['uuid'] = uuid_v7();
+            $data['uuid'] = uuid_v4();
         }
 
         if (empty($data['status'])) {

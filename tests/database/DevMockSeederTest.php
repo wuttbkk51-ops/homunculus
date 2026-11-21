@@ -173,11 +173,18 @@ final class DevMockSeederTest extends CIUnitTestCase
         $userModel   = model(UserModel::class);
 
         // ตรวจสอบว่า Tenant ยังคงมีแค่ 2 เจ้าเท่าเดิม
-        $tenants = $tenantModel->findAll();
+        $tenants = $tenantModel->whereIn('slug', ['siam-future', 'bangkok-logistic'])->findAll();
         $this->assertCount(2, $tenants);
 
-        // ตรวจสอบว่า User ทั้งระบบมี 6 คนเท่าเดิม (admin 2 + user 4)
-        $users = $userModel->findAll();
+        // ตรวจสอบว่า User ที่สร้างโดย seeder ยังคงมี 6 คนเท่าเดิม (admin 2 + user 4)
+        $users = $userModel->whereIn('username', [
+            'superAdmin',
+            'juniorDev',
+            'siamOwner',
+            'siamStaff',
+            'bkkOwner',
+            'bkkStaff',
+        ])->findAll();
         $this->assertCount(6, $users);
     }
 }

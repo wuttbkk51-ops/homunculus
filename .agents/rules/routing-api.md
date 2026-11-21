@@ -13,7 +13,7 @@ description: ใช้เมื่อเพิ่มหรือแก้ route,
 ## โครงสร้าง Admin Controllers
 - Controller ใน `app/Controllers/Admin/*` กำหนด URL และ view path โดย**ไม่มีคำว่า admin**
   เช่น `App\Controllers\Admin\Users` แมปไปที่ route `/users` และใช้ view จาก `app/Views/users/`
-- หน้าหลัก (Dashboard): `App\Controllers\Admin\Dashboard` เป็นหน้าหลักของระบบ ให้ทั้ง route `/` และ `/admin` ชี้มาที่หน้านี้
+- หน้าหลัก (Dashboard): `App\Controllers\Admin\Dashboard` แมปไปที่ route `/admin` และ `/dashboard` ส่วน route `/` ชี้ไปที่ `Home::index`
 
 ## API และ Response Format
 - ข้อมูลใดก็ตามที่ส่งผ่าน Header หรือ Parameter ภายนอก ห้ามใช้ตัวเลข ID ที่เดาง่าย (เช่น Auto-increment ID) ให้เปลี่ยนไปใช้ UUID ที่ยากต่อการเดาแทนเสมอ เพื่อป้องกันการโจมตีแบบ IDOR และการรั่วไหลของข้อมูลธุรกิจ
