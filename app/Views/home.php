@@ -57,9 +57,7 @@
     <nav class="navbar navbar-expand-lg fixed-top navbar-blur">
         <div class="container py-1">
             <a class="navbar-brand fw-bold d-flex align-items-center gap-2 text-dark" href="<?= base_url() ?>">
-                <span class="d-inline-flex align-items-center justify-content-center bg-dark text-white rounded-3 p-2" style="width: 32px; height: 32px;">
-                    <i class="bi bi-cpu-fill" style="font-size: 1rem;"></i>
-                </span>
+                <img src="<?= base_url('assets/img/icon.svg') ?>" alt="Homunculus" width="32" height="32" class="rounded-2">
                 <span>Homunculus</span>
             </a>
 
