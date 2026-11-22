@@ -1,6 +1,6 @@
 # Homunculus
 
-A Unix Philosophy SaaS Framework built on CodeIgniter 4 (CI4) — Minimal, modular, and ready
+A Modular (HMVC) SaaS Framework built on CodeIgniter 4 (CI4) — Guided by Unix Philosophy
 
 ## Setup
 
