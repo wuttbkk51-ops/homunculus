@@ -29,7 +29,7 @@ php spark migrate --all
 
 ### 4. (Optional) Run seeder
 ```bash
-php spark db:seed <SeederName>
+php spark db:seed Starter
 ```
 
 ### 5. Start dev server
