@@ -25,8 +25,11 @@ class AppFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
+        // Dev bypass: uncomment the line below to skip all checks during development
+        // return;
+
         // Bypass public pages (app/Controllers/Guest/*)
-        $controller = service('router')->controllerName();  
+        $controller = service('router')->controllerName();
         if (str_starts_with($controller, '\\App\\Controllers\\Guest\\')) {
             return;
         }

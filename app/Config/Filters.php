@@ -2,6 +2,7 @@
 
 namespace Config;
 
+use App\Filters\AppFilter;
 use CodeIgniter\Config\Filters as BaseFilters;
 use CodeIgniter\Filters\Cors;
 use CodeIgniter\Filters\CSRF;
@@ -77,7 +78,7 @@ class Filters extends BaseFilters
             'csrf',
             // 'invalidchars',
             'appfilter' => [
-                'except'=>[
+                'except' => [
                     '/',
                     'login*',
                     'logout',
