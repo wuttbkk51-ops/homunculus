@@ -7,8 +7,8 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class About extends BaseController
 {
-    public function index()
+    public function index(): string
     {
-        //
+        return view('pages/about');
     }
 }

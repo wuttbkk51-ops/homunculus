@@ -45,23 +45,26 @@
     "scripts": {
         "test": "phpunit --no-coverage",
         "post-install-cmd": [
-            "SlowProg\\CopyFile\\ScriptHandler::copy"
+            "SlowProg\\CopyFile\\ScriptHandler::copy",
+            "php bin/download-assets.php"
         ],
         "post-update-cmd": [
-            "SlowProg\\CopyFile\\ScriptHandler::copy"
+            "SlowProg\\CopyFile\\ScriptHandler::copy",
+            "php bin/download-assets.php"
         ],
         "copy-assets": [
-            "SlowProg\\CopyFile\\ScriptHandler::copy"
+            "SlowProg\\CopyFile\\ScriptHandler::copy",
+            "php bin/download-assets.php"
         ]
     },
     "extra": {
         "copy-file": {
-            "vendor/almasaeed2010/adminlte/dist/css/adminlte.min.css": "public/assets/adminlte/css/adminlte.min.css",
-            "vendor/almasaeed2010/adminlte/dist/css/adminlte.min.css.map": "public/assets/adminlte/css/adminlte.min.css.map",
-            "vendor/almasaeed2010/adminlte/dist/css/adminlte-colors.min.css": "public/assets/adminlte/css/adminlte-colors.min.css",
-            "vendor/almasaeed2010/adminlte/dist/css/adminlte-colors.min.css.map": "public/assets/adminlte/css/adminlte-colors.min.css.map",
-            "vendor/almasaeed2010/adminlte/dist/js/adminlte.min.js": "public/assets/adminlte/js/adminlte.min.js",
-            "vendor/almasaeed2010/adminlte/dist/js/adminlte.min.js.map": "public/assets/adminlte/js/adminlte.min.js.map"
+            "vendor/almasaeed2010/adminlte/dist/css/adminlte.min.css": "public/assets/vendor/adminlte/css/adminlte.min.css",
+            "vendor/almasaeed2010/adminlte/dist/css/adminlte.min.css.map": "public/assets/vendor/adminlte/css/adminlte.min.css.map",
+            "vendor/almasaeed2010/adminlte/dist/css/adminlte-colors.min.css": "public/assets/vendor/adminlte/css/adminlte-colors.min.css",
+            "vendor/almasaeed2010/adminlte/dist/css/adminlte-colors.min.css.map": "public/assets/vendor/adminlte/css/adminlte-colors.min.css.map",
+            "vendor/almasaeed2010/adminlte/dist/js/adminlte.min.js": "public/assets/vendor/adminlte/js/adminlte.min.js",
+            "vendor/almasaeed2010/adminlte/dist/js/adminlte.min.js.map": "public/assets/vendor/adminlte/js/adminlte.min.js.map"
         }
     }
 }
