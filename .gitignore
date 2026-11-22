@@ -129,6 +129,7 @@ _modules/*
 /writable/*.db
 .php-cs-fixer.cache
 /public/assets/vendor/*
+composer.lock
 
 
 
