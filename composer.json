@@ -42,7 +42,7 @@
         "sort-packages": true
     },
     "scripts": {
-        "test": "phpunit",
+        "test": "phpunit --no-coverage",
         "post-install-cmd": [
             "SlowProg\\CopyFile\\ScriptHandler::copy"
         ],
