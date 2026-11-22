@@ -128,3 +128,5 @@ _modules/*
 # homunculus
 /writable/*.db
 /public/assets/adminlte
+.php-cs-fixer.cache
+

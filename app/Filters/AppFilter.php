@@ -25,11 +25,11 @@ class AppFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Bypass public pages (Guest/*)
-        $controller = service('router')->controllerName();
+        // Bypass public pages (app/Controllers/Guest/*)
+        $controller = service('router')->controllerName();  
         if (str_starts_with($controller, '\\App\\Controllers\\Guest\\')) {
-    return;
-}
+            return;
+        }
 
 
     }
