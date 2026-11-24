@@ -10,7 +10,7 @@ class CreatePeopleAndTenantUsers extends Migration
 {
     public function up(): void
     {
-        // 1. people (Party Table with Embedded Default Address)
+        // 1. people (Party Table - เรียกใช้ address_id แบบไม่บังคับ / Nullable)
         $this->forge->addField([
             'id' => [
                 'type'           => 'INT',
@@ -46,31 +46,11 @@ class CreatePeopleAndTenantUsers extends Migration
                 'constraint' => 255,
                 'null'       => true,
             ],
-            // Embedded Default Address
-            'address_line' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 255,
-                'null'       => true,
-            ],
-            'subdistrict' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 100,
-                'null'       => true,
-            ],
-            'district' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 100,
-                'null'       => true,
-            ],
-            'province' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 100,
-                'null'       => true,
-            ],
-            'postal_code' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 10,
-                'null'       => true,
+            'address_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => true, // ไม่บังคับ (Optional)
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -84,8 +64,10 @@ class CreatePeopleAndTenantUsers extends Migration
 
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('tenant_id', 'tenants', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('address_id', 'addresses', 'id', 'CASCADE', 'SET NULL');
         $this->forge->addKey(['tenant_id', 'last_name', 'first_name']);
         $this->forge->addKey(['tenant_id', 'phone']);
+        $this->forge->addKey(['tenant_id', 'address_id']);
         $this->forge->createTable('people', true);
 
         // 2. tenant_users (Shield Bridge Table)

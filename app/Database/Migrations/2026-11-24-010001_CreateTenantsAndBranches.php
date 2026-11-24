@@ -30,6 +30,11 @@ class CreateTenantsAndBranches extends Migration
                 'type'       => 'VARCHAR',
                 'constraint' => 150,
             ],
+            'tax_id' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 20,
+                'null'       => true,
+            ],
             'status' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 20,

@@ -28,6 +28,28 @@ class CreateTenantRolesAndUserPermissions extends Migration
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
             ],
+            /**
+             * ตัวอย่างโครงสร้าง JSON ของ `permissions`:
+             *
+             * แบบที่ 1 (Array ธรรมดา):
+             * [
+             *     "users.create",
+             *     "users.edit",
+             *     "sales.*",
+             *     "reports.view"
+             * ]
+             *
+             * แบบที่ 2 (โครงสร้างแบบ เพิ่ม-ลด / Grant-Deny):
+             * {
+             *     "grant": [
+             *         "sales.*",
+             *         "reports.view"
+             *     ],
+             *     "deny": [
+             *         "sales.delete"
+             *     ]
+             * }
+             */
             'permissions' => [
                 'type' => 'JSON',
                 'null' => true,
@@ -75,6 +97,20 @@ class CreateTenantRolesAndUserPermissions extends Migration
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
             ],
+            /**
+             * ตัวอย่างโครงสร้าง JSON ของ `extra_permissions` (Custom Override per User):
+             * โครงสร้างแบบ เพิ่ม-ลด เฉพาะบุคคล (Grant/Deny Overrides จาก Role เดิม)
+             * {
+             *     "grant": [
+             *         "reports.export",
+             *         "inventory.count"
+             *     ],
+             *     "deny": [
+             *         "sales.delete",
+             *         "users.edit"
+             *     ]
+             * }
+             */
             'extra_permissions' => [
                 'type' => 'JSON',
                 'null' => true,
