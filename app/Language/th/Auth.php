@@ -40,6 +40,9 @@ return [
     'passwordConfirm' => 'ยืนยันรหัสผ่านอีกครั้ง',
     'haveAccount'     => 'มีบัญชีผู้ใช้อยู่แล้ว?',
     'token'           => 'Token',
+    'companyName'     => 'ชื่อบริษัท',
+    'agreeToThe'      => 'ฉันยอมรับ',
+    'terms'           => 'เงื่อนไขการใช้งาน',
 
     // Buttons
     'confirm' => 'ยืนยัน',

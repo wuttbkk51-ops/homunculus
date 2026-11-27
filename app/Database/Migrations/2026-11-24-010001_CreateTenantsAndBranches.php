@@ -18,6 +18,10 @@ class CreateTenantsAndBranches extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
+            'uuid' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 36,
+            ],
             'code' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
@@ -55,6 +59,7 @@ class CreateTenantsAndBranches extends Migration
         ]);
 
         $this->forge->addKey('id', true);
+        $this->forge->addUniqueKey('uuid');
         $this->forge->addUniqueKey('code');
         $this->forge->addUniqueKey('slug');
         $this->forge->createTable('tenants', true);

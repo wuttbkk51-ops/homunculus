@@ -34,6 +34,15 @@ class AppFilter implements FilterInterface
             return;
         }
 
+        // check Cache()
+
+        // check shield auth
+        if(!auth()->loggedIn()){
+            session()->setTempdata('beforeLoginUrl', current_url(), 300);
+            return redirect()->to(url_to('login'))->with('error', 'กรุณาเข้าสู่ระบบก่อนทำรายการ');
+        }
+
+                
 
     }
 
