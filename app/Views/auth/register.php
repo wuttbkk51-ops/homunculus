@@ -36,22 +36,11 @@
     <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
 
     <!--begin::Fonts-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.3.1/index.css"
-      integrity="sha256-VzMk9RVNVApO0cXfOO7il3dD8OPyu0aDyyLDd8EEGk8="
-      crossorigin="anonymous"
-      media="print"
-      onload="this.media='all'"
-    />
+    <link rel="stylesheet" href="<?= base_url('assets/vendor/fonts/noto-sans-thai/noto-sans-thai.css')?>" media="print" onload="this.media='all'" />
     <!--end::Fonts-->
 
     <!--begin::Bootstrap Icons-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css"
-      crossorigin="anonymous"
-    />
+      <link rel="stylesheet" href="<?= base_url('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') ?>" />
     <!--end::Bootstrap Icons-->
 
     <!--begin::AdminLTE-->
